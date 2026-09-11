@@ -285,7 +285,7 @@ function Steps() {
 // ============================================================
 function SeeIt() {
   const links = [
-    { t:'An actual report', d:'Thirty pages. Every marker explained in plain English, cross-referenced against the rest. This is what lands in your client\u2019s inbox.', a:'View a real report', href:'/our-report', big:true },
+    { t:'An actual report', d:'Every marker explained in plain English and cross-referenced against the rest. This is what lands in your client\u2019s inbox.', a:'View a real report', href:'/our-report', big:true },
     { t:'Compare the panels', d:'Advanced, Ultimate and Signature side by side, with exactly what each one measures.', a:'See all panels', href:'/panels' },
     { t:'Find a clinic', d:'103 UK clinics plus at-home visits in 200+ areas. Check there is one near your clients.', a:'Search by postcode', href:'/find-a-clinic' },
     { t:'Why we exist', d:'James was told it was in his head. One comprehensive test found a hormone at twice the upper limit.', a:'Read the story', href:'/about' },
@@ -415,7 +415,7 @@ function Resources({ signedIn }) {
   const items = [
     { t:'How we compare', d:'Honest comparison against the other UK providers, including where they beat us.', a:'Read it', href:'https://truevitals.co.uk/uk-blood-test-companies-compared', gated:false },
     { t:'Panel comparison', d:'Advanced, Ultimate and Signature side by side, with what each one measures.', a:'View', href:'https://truevitals.co.uk/panels', gated:false },
-    { t:'Example report', d:'What your client actually receives. Thirty pages, plain English, every marker explained.', a:'View', href:'https://truevitals.co.uk/our-report', gated:false },
+    { t:'Example report', d:'What your client actually receives. Plain English, every marker explained.', a:'View', href:'https://truevitals.co.uk/our-report', gated:false },
     { t:'Logo pack', d:'PNG and SVG, light and dark. For your website, emails and socials.', a:'Coming soon', href:'#', gated:true },
     { t:'Client one-pager', d:'A single page you can hand over or attach to an email.', a:'Coming soon', href:'#', gated:true },
     { t:'Social templates', d:'Ready-made posts you can drop your code into.', a:'Coming soon', href:'#', gated:true }
