@@ -639,7 +639,7 @@ function ReferClient({ partner, rates, onDone }) {
   const rate = rates.find(r => r.panel === panel)
 
   const submit = async () => {
-    if (!name.trim()) { setErr('Enter your client\u2019s name'); return }
+    if (!email.trim() || email.indexOf('@') < 1) { setErr('Enter your client\u2019s email address'); return }
     setBusy(true); setErr('')
     try {
       const res = await fetch(WORKER + '/partner-refer', {
@@ -648,7 +648,7 @@ function ReferClient({ partner, rates, onDone }) {
         body: JSON.stringify({
           auth_user_id: partner.auth_user_id,
           customer_name: name.trim(),
-          customer_email: email.trim(),
+          customer_email: email.trim().toLowerCase(),
           panel: panel
         })
       })
@@ -708,15 +708,15 @@ function ReferClient({ partner, rates, onDone }) {
       <div className="relative">
         <p className="text-[11px] font-bold uppercase tracking-[0.15em] text-tv-teal mb-2">Refer a client</p>
         <p className="text-sm text-gray-400 mb-6 max-w-md leading-relaxed">
-          Enter their details and we&rsquo;ll create a code just for them. They get money off, you get paid when they book.
+          Enter their email and we&rsquo;ll create a code just for them. They get money off, you get paid when they book.
         </p>
 
         {err && <div className="mb-4 px-4 py-3 rounded-lg bg-red-500/10 border border-red-500/20 text-red-300 text-sm">{err}</div>}
 
         <div className="grid sm:grid-cols-2 gap-3 mb-3">
-          <input value={name} onChange={e => setName(e.target.value)} placeholder="Client name"
+          <input value={email} onChange={e => setEmail(e.target.value)} placeholder="Client email" type="email"
             className="px-4 py-3 rounded-xl bg-white/5 border border-white/10 text-white placeholder-gray-600 text-sm outline-none focus:border-tv-teal transition-colors" />
-          <input value={email} onChange={e => setEmail(e.target.value)} placeholder="Their email (optional)" type="email"
+          <input value={name} onChange={e => setName(e.target.value)} placeholder="Their name (optional)"
             className="px-4 py-3 rounded-xl bg-white/5 border border-white/10 text-white placeholder-gray-600 text-sm outline-none focus:border-tv-teal transition-colors" />
         </div>
 
