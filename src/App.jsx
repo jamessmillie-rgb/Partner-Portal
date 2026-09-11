@@ -8,6 +8,8 @@ const supabase = createClient(SUPABASE_URL, SUPABASE_ANON)
 const WORKER = 'https://truevitals-stripe-webhook.james-smillie-8c6.workers.dev'
 const LOGO = 'https://cdn.prod.website-files.com/6825a8869d9afdbdbc4d8881/68500823ebf7f5e6d4b298f9_Copy%20of%20TrueVitals%20Inverse.png'
 const IMG_GYM = 'https://cdn.prod.website-files.com/6825a8869d9afdbdbc4d8881/684748d492723b166ebf1973_gym.jpg'
+const IMG_HERO = 'https://cdn.prod.website-files.com/6825a8869d9afdbdbc4d8881/6a85f89c6bd497fdb00d29da_Gemini_Generated_Image_wdxwy1wdxwy1wdxw.webp'
+const TRUSTPILOT = 'https://uk.trustpilot.com/review/truevitals.co.uk'
 const IMG_YOGA = 'https://cdn.prod.website-files.com/6825a8869d9afdbdbc4d8881/684748d55c72d057d0ab48ee_man-yoga-p-1600.jpg'
 const IMG_BOWL = 'https://cdn.prod.website-files.com/6825a8869d9afdbdbc4d8881/684748d64d408f486a9e2f47_healthy-bowl-p-1600.jpg'
 const IMG_MED  = 'https://cdn.prod.website-files.com/6825a8869d9afdbdbc4d8881/684748d56f604078858be7f7_man-meditating-p-1600.avif'
@@ -44,28 +46,47 @@ function Hero() {
   return (
     <section className="relative bg-tv-dark overflow-hidden">
       <div className="absolute inset-0">
-        <img src={IMG_GYM} alt="" className="w-full h-full object-cover opacity-[0.28]" />
-        <div className="absolute inset-0 bg-gradient-to-r from-tv-dark via-tv-dark/95 to-tv-dark/50" />
-        <div className="absolute inset-0 bg-gradient-to-t from-tv-dark via-transparent to-tv-dark/60" />
+        <img src={IMG_GYM} alt="" className="w-full h-full object-cover opacity-[0.14]" />
+        <div className="absolute inset-0 bg-gradient-to-b from-tv-dark/80 via-tv-dark/95 to-tv-dark" />
       </div>
-      <div className="absolute -top-40 left-1/2 -translate-x-1/2 w-[900px] h-[600px] rounded-full bg-tv-teal/10 blur-3xl pointer-events-none" />
-      <div className="relative max-w-6xl mx-auto px-5 sm:px-8 pt-20 pb-24 sm:pt-28 sm:pb-32">
-        <span className="inline-block px-3.5 py-1.5 rounded-full bg-tv-teal/10 text-tv-teal text-[11px] font-bold uppercase tracking-[0.18em] mb-7">Partner Programme</span>
-        <h1 className="font-heading font-black text-white leading-[1.02] tracking-[-0.045em] text-[2.6rem] sm:text-6xl lg:text-7xl max-w-4xl">
-          The test your clients<br className="hidden sm:block" /> already want.<br />
-          <span className="text-tv-teal">Get paid every time.</span>
-        </h1>
-        <p className="mt-7 text-gray-400 text-lg leading-relaxed max-w-xl">
-          Refer your clients to the UK&rsquo;s most comprehensive blood testing. They get money off. You get paid on every test they ever book, not just the first.
-        </p>
-        <div className="mt-9 flex flex-wrap gap-3">
-          <a href="#apply" className="px-7 py-3.5 rounded-xl bg-tv-teal text-tv-dark font-bold text-sm hover:bg-tv-teal-dark transition-all hover:-translate-y-0.5">Apply in two minutes</a>
-          <a href="#earn" className="px-7 py-3.5 rounded-xl border-2 border-white/15 text-white font-bold text-sm hover:border-tv-teal hover:text-tv-teal transition-colors">See what you earn</a>
-          <a href="https://truevitals.co.uk/our-report" target="_blank" rel="noopener" className="px-7 py-3.5 text-white/70 font-bold text-sm hover:text-tv-teal transition-colors">View a real report &rarr;</a>
+      <div className="absolute -top-40 left-1/4 w-[700px] h-[560px] rounded-full bg-tv-teal/10 blur-3xl pointer-events-none" />
+
+      <div className="relative max-w-6xl mx-auto px-5 sm:px-8 pt-16 pb-20 sm:pt-20 sm:pb-24">
+        <div className="grid lg:grid-cols-12 gap-12 lg:gap-8 items-center">
+
+          <div className="lg:col-span-7">
+            <span className="inline-block px-3.5 py-1.5 rounded-full bg-tv-teal/10 text-tv-teal text-[11px] font-bold uppercase tracking-[0.18em] mb-7">Partner Programme</span>
+            <h1 className="font-heading font-black text-white leading-[1.02] tracking-[-0.045em] text-[2.5rem] sm:text-6xl">
+              The test your clients already want.<br />
+              <span className="text-tv-teal">Get paid every time.</span>
+            </h1>
+            <p className="mt-7 text-gray-400 text-lg leading-relaxed max-w-xl">
+              Refer your clients to the UK&rsquo;s most comprehensive blood testing. They get money off. You get paid on every test they ever book, not just the first.
+            </p>
+            <div className="mt-9 flex flex-wrap items-center gap-3">
+              <a href="#apply" className="px-7 py-3.5 rounded-xl bg-tv-teal text-tv-dark font-bold text-sm hover:bg-tv-teal-dark transition-all hover:-translate-y-0.5">Apply in two minutes</a>
+              <a href="#earn" className="px-7 py-3.5 rounded-xl border-2 border-white/15 text-white font-bold text-sm hover:border-tv-teal hover:text-tv-teal transition-colors">See what you earn</a>
+            </div>
+            <a href={TRUSTPILOT} target="_blank" rel="noopener" className="mt-8 inline-flex items-center gap-2.5 text-sm text-gray-400 hover:text-white transition-colors group">
+              <span className="flex gap-0.5">{[0,1,2,3,4].map(i=>(
+                <svg key={i} viewBox="0 0 24 24" className="w-4 h-4 fill-tv-teal"><path d="M12 2l2.9 6.9 7.1.6-5.4 4.7 1.6 7L12 17.5 5.8 21.2l1.6-7L2 9.5l7.1-.6L12 2z"/></svg>
+              ))}</span>
+              <span>Rated <b className="text-white font-semibold">Excellent</b> on Trustpilot</span>
+              <span className="text-tv-teal group-hover:translate-x-0.5 transition-transform">&rarr;</span>
+            </a>
+          </div>
+
+          <div className="lg:col-span-5 relative">
+            <div className="absolute -inset-8 bg-tv-teal/10 blur-3xl rounded-full pointer-events-none" />
+            <img src={IMG_HERO} alt="TrueVitals report on a phone: personalised analysis, biomarker ranges and longitudinal tracking"
+                 className="relative w-full h-auto drop-shadow-2xl" />
+          </div>
+
         </div>
-        <div className="mt-14 grid grid-cols-2 lg:grid-cols-4 gap-px bg-white/8 rounded-2xl overflow-hidden border border-white/8">
+
+        <div className="mt-16 grid grid-cols-2 lg:grid-cols-4 gap-px bg-white/8 rounded-2xl overflow-hidden border border-white/8">
           {[['£20','Advanced'],['£40','Ultimate'],['£80','Signature'],['∞','Paid for life']].map(([a,b],i)=>(
-            <div key={i} className="bg-tv-dark px-6 py-7">
+            <div key={i} className="bg-tv-dark/80 backdrop-blur px-6 py-7">
               <div className="font-heading font-black text-3xl text-tv-teal tracking-[-0.04em] leading-none">{a}</div>
               <div className="text-[11px] font-semibold uppercase tracking-wider text-gray-500 mt-2.5">{b}</div>
             </div>
@@ -278,7 +299,8 @@ function SeeIt() {
     { t:'Compare the panels', d:'Advanced, Ultimate and Signature side by side, with exactly what each one measures.', a:'See all panels', href:'/panels' },
     { t:'Find a clinic', d:'103 UK clinics plus at-home visits in 200+ areas. Check there is one near your clients.', a:'Search by postcode', href:'/find-a-clinic' },
     { t:'Why we exist', d:'James was told it was in his head. One comprehensive test found a hormone at twice the upper limit.', a:'Read the story', href:'/about' },
-    { t:'How we compare', d:'Honest comparison against Medichecks, Thriva, Randox and the rest. We include where they beat us.', a:'Read the comparison', href:'/uk-blood-test-companies-compared' }
+    { t:'How we compare', d:'Honest comparison against Medichecks, Thriva, Randox and the rest. We include where they beat us.', a:'Read the comparison', href:'/uk-blood-test-companies-compared' },
+    { t:'What customers say', d:'Rated Excellent on Trustpilot. Read what people say about the report, the clinics and the follow-up.', a:'Read the reviews', href:'TP' }
   ]
   return (
     <section className="bg-gray-50 py-20 sm:py-28">
@@ -302,7 +324,7 @@ function SeeIt() {
           </a>
 
           {links.slice(1).map((l,i)=>(
-            <a key={i} href={'https://truevitals.co.uk'+l.href} target="_blank" rel="noopener"
+            <a key={i} href={l.href==='TP' ? TRUSTPILOT : 'https://truevitals.co.uk'+l.href} target="_blank" rel="noopener"
                className="rounded-2xl bg-white border border-gray-100 p-7 hover:border-tv-teal/40 transition-colors group">
               <h3 className="font-heading font-bold text-lg tracking-tight mb-2.5">{l.t}</h3>
               <p className="text-sm text-gray-500 leading-relaxed mb-5">{l.d}</p>
@@ -473,7 +495,7 @@ function Foot() {
       <div className="max-w-6xl mx-auto px-5 sm:px-8">
         <img src={LOGO} alt="TrueVitals" className="h-8 w-auto mb-6" />
         <div className="flex flex-wrap gap-x-7 gap-y-2 text-sm text-gray-400 mb-8">
-          {[['Main site','https://truevitals.co.uk'],['Panels','https://truevitals.co.uk/panels'],['Example report','https://truevitals.co.uk/our-report'],['Find a clinic','https://truevitals.co.uk/find-a-clinic'],['Our story','https://truevitals.co.uk/about'],['partners@truevitals.co.uk','mailto:partners@truevitals.co.uk']].map(([t,h],i)=>(
+          {[['Main site','https://truevitals.co.uk'],['Panels','https://truevitals.co.uk/panels'],['Example report','https://truevitals.co.uk/our-report'],['Find a clinic','https://truevitals.co.uk/find-a-clinic'],['Our story','https://truevitals.co.uk/about'],['Trustpilot','https://uk.trustpilot.com/review/truevitals.co.uk'],['partners@truevitals.co.uk','mailto:partners@truevitals.co.uk']].map(([t,h],i)=>(
             <a key={i} href={h} target="_blank" rel="noopener" className="hover:text-tv-teal transition-colors">{t}</a>
           ))}
         </div>
