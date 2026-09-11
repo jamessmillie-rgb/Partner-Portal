@@ -107,63 +107,127 @@ function Shell({ partner, children, onSignOut }) {
 }
 
 // ============================================================
-//  CODE CARD
+//  REFER A CLIENT
 // ============================================================
-function CodeCard({ partner }) {
-  const [copied, setCopied] = useState(null)
-  const link = `https://truevitals.co.uk/panels?ref=${partner.referral_code}`
 
-  const copy = (text, which) => {
-    navigator.clipboard.writeText(text).then(() => {
-      setCopied(which); setTimeout(() => setCopied(null), 2000)
+const WORKER = 'https://truevitals-stripe-webhook.james-smillie-8c6.workers.dev'
+
+function ReferClient({ partner, rates, onDone }) {
+  const [name, setName] = useState('')
+  const [email, setEmail] = useState('')
+  const [panel, setPanel] = useState('ultimate')
+  const [busy, setBusy] = useState(false)
+  const [err, setErr] = useState('')
+  const [result, setResult] = useState(null)
+  const [copied, setCopied] = useState(false)
+
+  const rate = rates.find(r => r.panel === panel)
+
+  const submit = async () => {
+    if (!name.trim()) { setErr('Enter your client\u2019s name'); return }
+    setBusy(true); setErr('')
+    try {
+      const res = await fetch(WORKER + '/partner-refer', {
+        method: 'POST', mode: 'cors', credentials: 'omit',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          auth_user_id: partner.auth_user_id,
+          customer_name: name.trim(),
+          customer_email: email.trim(),
+          panel: panel
+        })
+      })
+      const data = await res.json()
+      if (!res.ok || data.error) throw new Error(data.error || 'Something went wrong')
+      setResult(data)
+      setName(''); setEmail('')
+      onDone()
+    } catch (e) {
+      setErr(e.message || 'Something went wrong. Try again.')
+    }
+    setBusy(false)
+  }
+
+  const copy = () => {
+    navigator.clipboard.writeText(result.code).then(() => {
+      setCopied(true); setTimeout(() => setCopied(false), 2000)
     })
   }
 
-  const hasDiscount = (partner.customer_discount_pence || 0) > 0
+  if (result) return (
+    <div className="bg-tv-dark rounded-2xl p-6 sm:p-8 mb-6 relative overflow-hidden">
+      <div className="absolute -top-24 -right-16 w-64 h-64 rounded-full bg-tv-teal/10 blur-3xl pointer-events-none" />
+      <div className="relative">
+        <p className="text-[11px] font-bold uppercase tracking-[0.15em] text-tv-teal mb-3">Code created</p>
+        <div className="flex flex-col sm:flex-row sm:items-center gap-3 mb-5">
+          <div className="font-heading font-black text-3xl sm:text-4xl text-white tracking-tight">{result.code}</div>
+          <button onClick={copy} className="self-start px-4 py-2 rounded-lg bg-white/10 hover:bg-white/15 text-white text-xs font-bold transition-colors">
+            {copied ? 'Copied' : 'Copy code'}
+          </button>
+        </div>
+        <div className="grid sm:grid-cols-2 gap-3 mb-5">
+          <div className="bg-white/5 rounded-xl p-4">
+            <p className="text-[10px] font-bold uppercase tracking-wider text-gray-500 mb-1">They save</p>
+            <p className="font-heading font-bold text-xl text-white">{gbp(result.discount_pence)}</p>
+          </div>
+          <div className="bg-white/5 rounded-xl p-4">
+            <p className="text-[10px] font-bold uppercase tracking-wider text-gray-500 mb-1">You earn</p>
+            <p className="font-heading font-bold text-xl text-tv-teal">{gbp(result.commission_pence)}</p>
+          </div>
+        </div>
+        <p className="text-xs text-gray-500 leading-relaxed mb-5">
+          Single use, valid until {fmtDate(result.expires)}. They enter it at checkout on truevitals.co.uk.
+          If they upgrade to a bigger panel, your commission goes up to match.
+        </p>
+        <button onClick={() => setResult(null)}
+          className="px-5 py-2.5 rounded-lg bg-tv-teal text-tv-dark text-sm font-bold hover:bg-tv-teal-dark transition-colors">
+          Refer someone else
+        </button>
+      </div>
+    </div>
+  )
 
   return (
     <div className="bg-tv-dark rounded-2xl p-6 sm:p-8 mb-6 relative overflow-hidden">
       <div className="absolute -top-24 -right-16 w-64 h-64 rounded-full bg-tv-teal/8 blur-3xl pointer-events-none" />
       <div className="relative">
-        <p className="text-[11px] font-bold uppercase tracking-[0.15em] text-tv-teal mb-4">Your referral code</p>
-        <div className="flex flex-col sm:flex-row sm:items-center gap-3 mb-6">
-          <div className="font-heading font-black text-3xl sm:text-4xl text-white tracking-tight">{partner.referral_code}</div>
-          <button onClick={() => copy(partner.referral_code, 'code')}
-            className="self-start px-4 py-2 rounded-lg bg-white/10 hover:bg-white/15 text-white text-xs font-bold transition-colors">
-            {copied === 'code' ? 'Copied' : 'Copy code'}
-          </button>
+        <p className="text-[11px] font-bold uppercase tracking-[0.15em] text-tv-teal mb-2">Refer a client</p>
+        <p className="text-sm text-gray-400 mb-6 max-w-md leading-relaxed">
+          Enter their details and we&rsquo;ll create a code just for them. They get money off, you get paid when they book.
+        </p>
+
+        {err && <div className="mb-4 px-4 py-3 rounded-lg bg-red-500/10 border border-red-500/20 text-red-300 text-sm">{err}</div>}
+
+        <div className="grid sm:grid-cols-2 gap-3 mb-3">
+          <input value={name} onChange={e => setName(e.target.value)} placeholder="Client name"
+            className="px-4 py-3 rounded-xl bg-white/5 border border-white/10 text-white placeholder-gray-600 text-sm outline-none focus:border-tv-teal transition-colors" />
+          <input value={email} onChange={e => setEmail(e.target.value)} placeholder="Their email (optional)" type="email"
+            className="px-4 py-3 rounded-xl bg-white/5 border border-white/10 text-white placeholder-gray-600 text-sm outline-none focus:border-tv-teal transition-colors" />
         </div>
 
-        <div className="grid sm:grid-cols-2 gap-3 mb-6">
-          {hasDiscount && (
-            <div className="bg-white/5 rounded-xl p-4">
-              <p className="text-[10px] font-bold uppercase tracking-wider text-gray-500 mb-1">Your client saves</p>
-              <p className="font-heading font-bold text-xl text-white">{gbp(partner.customer_discount_pence)}</p>
-            </div>
-          )}
-          {(partner.commission_pence || 0) > 0 && (
-            <div className="bg-white/5 rounded-xl p-4">
-              <p className="text-[10px] font-bold uppercase tracking-wider text-gray-500 mb-1">You earn</p>
-              <p className="font-heading font-bold text-xl text-tv-teal">{gbp(partner.commission_pence)}</p>
-            </div>
-          )}
-        </div>
-
-        <div className="border-t border-white/10 pt-5">
-          <p className="text-[11px] font-bold uppercase tracking-[0.15em] text-gray-500 mb-2.5">Share this link</p>
-          <div className="flex items-center gap-2 bg-black/30 rounded-lg px-3.5 py-3">
-            <code className="text-xs text-gray-300 truncate flex-1 font-mono">{link}</code>
-            <button onClick={() => copy(link, 'link')}
-              className="shrink-0 text-xs font-bold text-tv-teal hover:text-white transition-colors">
-              {copied === 'link' ? 'Copied' : 'Copy'}
+        <p className="text-[10px] font-bold uppercase tracking-wider text-gray-500 mb-2 mt-5">Which panel are you recommending?</p>
+        <div className="grid sm:grid-cols-3 gap-2 mb-5">
+          {rates.map(r => (
+            <button key={r.panel} onClick={() => setPanel(r.panel)}
+              className={`px-4 py-3 rounded-xl border text-left transition-colors ${panel === r.panel ? 'border-tv-teal bg-tv-teal/10' : 'border-white/10 bg-white/5 hover:border-white/20'}`}>
+              <span className={`block text-sm font-bold ${panel === r.panel ? 'text-tv-teal' : 'text-white'}`}>{r.label.replace(' Panel', '')}</span>
+              <span className="block text-[11px] text-gray-500 mt-0.5">You earn {gbp(r.commission_pence)}</span>
             </button>
-          </div>
-          <p className="text-xs text-gray-500 mt-3 leading-relaxed">
-            {hasDiscount
-              ? `Your clients enter ${partner.referral_code} at checkout for ${gbp(partner.customer_discount_pence)} off. Every completed order is tracked below.`
-              : `Your clients enter ${partner.referral_code} at checkout so we know they came from you.`}
-          </p>
+          ))}
         </div>
+
+        {rate && (
+          <p className="text-xs text-gray-500 mb-5 leading-relaxed">
+            They&rsquo;ll save <span className="text-white font-medium">{gbp(rate.discount_pence)}</span> and
+            you&rsquo;ll earn <span className="text-tv-teal font-medium">{gbp(rate.commission_pence)}</span> once they book.
+            Not sure which panel? Pick anything &mdash; the rate follows whatever they actually buy.
+          </p>
+        )}
+
+        <button onClick={submit} disabled={busy}
+          className="px-6 py-3 rounded-xl bg-tv-teal text-tv-dark font-bold text-sm hover:bg-tv-teal-dark transition-colors disabled:opacity-50">
+          {busy ? 'Creating\u2026' : 'Create their code'}
+        </button>
       </div>
     </div>
   )
@@ -178,8 +242,10 @@ function Stats({ referrals, partner }) {
   const paid = referrals.filter(r => r.status === 'paid').reduce((s, r) => s + (r.commission_pence || 0), 0)
   const paysCommission = (partner.commission_pence || 0) > 0
 
+  const pendingRefs = referrals.filter(r => r.status === 'pending')
   const cards = [
-    { label: 'Referrals', value: conv.length, sub: 'completed orders' },
+    { label: 'Waiting to book', value: pendingRefs.length, sub: 'codes issued' },
+    { label: 'Booked', value: conv.length, sub: 'completed orders' },
     ...(paysCommission ? [
       { label: 'Pending', value: gbp(owed), sub: 'ready to pay out', accent: true },
       { label: 'Paid to date', value: gbp(paid), sub: 'lifetime earnings' }
@@ -189,7 +255,7 @@ function Stats({ referrals, partner }) {
   ]
 
   return (
-    <div className={`grid grid-cols-2 ${cards.length === 3 ? 'lg:grid-cols-3' : ''} gap-3 sm:gap-4 mb-6`}>
+    <div className={`grid grid-cols-2 ${cards.length >= 3 ? 'lg:grid-cols-4' : ''} gap-3 sm:gap-4 mb-6`}>
       {cards.map((c, i) => (
         <div key={i} className="bg-white rounded-2xl border border-gray-100 p-5 sm:p-6">
           <p className="text-[10px] font-bold uppercase tracking-wider text-gray-400 mb-2">{c.label}</p>
@@ -212,12 +278,12 @@ function Referrals({ referrals, partner }) {
     pending: 'bg-amber-50 text-amber-600',
     void: 'bg-red-50 text-red-500'
   }[s] || 'bg-gray-100 text-gray-500')
-  const label = (s) => ({ confirmed: 'Ready to pay', paid: 'Paid', pending: 'Pending', void: 'Cancelled' }[s] || s)
+  const label = (s) => ({ confirmed: 'Ready to pay', paid: 'Paid', pending: 'Not booked yet', void: 'Cancelled' }[s] || s)
 
   if (referrals.length === 0) return (
     <div className="bg-white rounded-2xl border border-gray-100 p-10 text-center">
       <p className="font-heading font-bold text-gray-900 mb-1">No referrals yet</p>
-      <p className="text-sm text-gray-400 max-w-xs mx-auto leading-relaxed">Share your code and completed orders will appear here within minutes.</p>
+      <p className="text-sm text-gray-400 max-w-xs mx-auto leading-relaxed">Refer your first client above and they&rsquo;ll appear here straight away.</p>
     </div>
   )
 
@@ -225,16 +291,19 @@ function Referrals({ referrals, partner }) {
     <div className="bg-white rounded-2xl border border-gray-100 overflow-hidden">
       <div className="px-5 sm:px-6 py-5 border-b border-gray-50">
         <h2 className="font-heading font-bold text-gray-900">Your referrals</h2>
-        <p className="text-xs text-gray-400 mt-0.5">Updated in real time as orders complete</p>
+        <p className="text-xs text-gray-400 mt-0.5">Codes you&rsquo;ve issued, and orders as they complete</p>
       </div>
       <div className="divide-y divide-gray-50">
         {referrals.map(r => (
           <div key={r.id} className="px-5 sm:px-6 py-4 flex items-center justify-between gap-4">
             <div className="min-w-0">
               <p className="font-medium text-sm text-gray-900 truncate">
-                {r.customer_first_name || 'Client'} · {PANEL[r.panel_type] || 'Panel'}
+                {r.customer_name || r.customer_first_name || 'Client'} · {PANEL[r.panel_type] || 'Panel'}
               </p>
-              <p className="text-xs text-gray-400 mt-0.5">{fmtDate(r.created_at)}</p>
+              <p className="text-xs text-gray-400 mt-0.5">
+                {fmtDate(r.created_at)}
+                {r.status === 'pending' && r.referral_code && <span className="font-mono ml-2 text-gray-500">{r.referral_code}</span>}
+              </p>
             </div>
             <div className="flex items-center gap-3 shrink-0">
               {paysCommission && <span className="font-heading font-bold text-sm text-gray-900">{gbp(r.commission_pence)}</span>}
@@ -344,6 +413,7 @@ export default function App() {
   const [partner, setPartner] = useState(null)
   const [referrals, setReferrals] = useState([])
   const [payouts, setPayouts] = useState([])
+  const [rates, setRates] = useState([])
   const [loading, setLoading] = useState(true)
   const [notFound, setNotFound] = useState(false)
 
@@ -358,11 +428,12 @@ export default function App() {
     const { data: p } = await supabase.from('partners').select('*').eq('auth_user_id', session.user.id).maybeSingle()
     if (!p) { setNotFound(true); setLoading(false); return }
     setPartner(p)
-    const [{ data: r }, { data: po }] = await Promise.all([
+    const [{ data: r }, { data: po }, { data: rt }] = await Promise.all([
       supabase.from('partner_referrals').select('*').eq('partner_id', p.id).order('created_at', { ascending: false }),
-      supabase.from('partner_payouts').select('*').eq('partner_id', p.id).order('created_at', { ascending: false })
+      supabase.from('partner_payouts').select('*').eq('partner_id', p.id).order('created_at', { ascending: false }),
+      supabase.from('partner_rates').select('*').order('commission_pence')
     ])
-    setReferrals(r || []); setPayouts(po || []); setLoading(false)
+    setReferrals(r || []); setPayouts(po || []); setRates(rt || []); setLoading(false)
   }, [session])
 
   useEffect(() => { load() }, [load])
@@ -397,7 +468,7 @@ export default function App() {
         </h1>
         <p className="text-sm text-gray-400 mt-1">Here's how your referrals are doing</p>
       </div>
-      <CodeCard partner={partner} />
+      <ReferClient partner={partner} rates={rates} onDone={load} />
       <Stats referrals={referrals} partner={partner} />
       <Referrals referrals={referrals} partner={partner} />
       <Payout partner={partner} referrals={referrals} payouts={payouts} onRequested={load} />
