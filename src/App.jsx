@@ -8,6 +8,10 @@ const supabase = createClient(SUPABASE_URL, SUPABASE_ANON)
 const WORKER = 'https://truevitals-stripe-webhook.james-smillie-8c6.workers.dev'
 const LOGO = 'https://cdn.prod.website-files.com/6825a8869d9afdbdbc4d8881/68500823ebf7f5e6d4b298f9_Copy%20of%20TrueVitals%20Inverse.png'
 const IMG_GYM = 'https://cdn.prod.website-files.com/6825a8869d9afdbdbc4d8881/684748d492723b166ebf1973_gym.jpg'
+const IMG_YOGA = 'https://cdn.prod.website-files.com/6825a8869d9afdbdbc4d8881/684748d55c72d057d0ab48ee_man-yoga-p-1600.jpg'
+const IMG_BOWL = 'https://cdn.prod.website-files.com/6825a8869d9afdbdbc4d8881/684748d64d408f486a9e2f47_healthy-bowl-p-1600.jpg'
+const IMG_MED  = 'https://cdn.prod.website-files.com/6825a8869d9afdbdbc4d8881/684748d56f604078858be7f7_man-meditating-p-1600.avif'
+const IMG_FRIENDS = 'https://cdn.prod.website-files.com/6825a8869d9afdbdbc4d8881/684748d7020515eb7456f600_friends-laughing-p-2000.avif'
 const IMG_HIKE = 'https://cdn.prod.website-files.com/6825a8869d9afdbdbc4d8881/684748d7a80f90e152e08c32_hikers-p-2000.avif'
 
 const gbp = (p) => '£' + ((p || 0) / 100).toLocaleString('en-GB', { minimumFractionDigits: 0, maximumFractionDigits: 0 })
@@ -83,14 +87,19 @@ function Why() {
         <p className="text-[11px] font-bold uppercase tracking-[0.18em] text-tv-teal-dark mb-4">Why it works</p>
         <h2 className="font-heading font-black text-3xl sm:text-5xl tracking-[-0.035em] leading-[1.08] max-w-2xl">You are not selling them anything new.</h2>
         <p className="mt-6 text-gray-500 text-lg leading-relaxed max-w-2xl">Your clients are already tracking sleep, steps, macros and recovery. Blood work is the one measurement they are missing, and most of them know it.</p>
-        <div className="mt-12 grid sm:grid-cols-2 gap-5">
-          {items.map((it,i)=>(
-            <div key={i} className="rounded-2xl border border-gray-100 p-7 hover:border-tv-teal/40 transition-colors">
-              <div className="w-9 h-9 rounded-xl bg-tv-teal/10 text-tv-teal-dark flex items-center justify-center font-bold mb-5">✓</div>
-              <h3 className="font-heading font-bold text-lg tracking-tight mb-2.5">{it.t}</h3>
-              <p className="text-sm text-gray-500 leading-relaxed">{it.d}</p>
-            </div>
-          ))}
+        <div className="mt-12 grid lg:grid-cols-5 gap-6 items-start">
+          <div className="lg:col-span-2 rounded-2xl overflow-hidden h-[280px] lg:h-[560px]">
+            <img src={IMG_YOGA} alt="" className="w-full h-full object-cover" />
+          </div>
+          <div className="lg:col-span-3 grid sm:grid-cols-2 gap-5">
+            {items.map((it,i)=>(
+              <div key={i} className="rounded-2xl border border-gray-100 p-7 hover:border-tv-teal/40 transition-colors">
+                <div className="w-9 h-9 rounded-xl bg-tv-teal/10 text-tv-teal-dark flex items-center justify-center font-bold mb-5">✓</div>
+                <h3 className="font-heading font-bold text-lg tracking-tight mb-2.5">{it.t}</h3>
+                <p className="text-sm text-gray-500 leading-relaxed">{it.d}</p>
+              </div>
+            ))}
+          </div>
         </div>
       </div>
     </section>
@@ -110,7 +119,14 @@ function HowToSell() {
         <p className="text-[11px] font-bold uppercase tracking-[0.18em] text-tv-teal mb-4">How to introduce it</p>
         <h2 className="font-heading font-black text-3xl sm:text-5xl tracking-[-0.035em] leading-[1.08] text-white max-w-2xl">Do not sell it.<br />Recommend it.</h2>
         <p className="mt-6 text-gray-400 text-lg leading-relaxed max-w-2xl">The worst thing you can do is pitch. The best thing you can do is bring it up at the moment it is obviously relevant, which happens more often than you think.</p>
-        <div className="mt-12 space-y-3">
+        <div className="mt-10 grid grid-cols-3 gap-3">
+          {[IMG_BOWL, IMG_MED, IMG_FRIENDS].map((im,i)=>(
+            <div key={i} className="rounded-2xl overflow-hidden h-32 sm:h-44">
+              <img src={im} alt="" className="w-full h-full object-cover opacity-80" />
+            </div>
+          ))}
+        </div>
+        <div className="mt-8 space-y-3">
           {lines.map((l,i)=>(
             <div key={i} className="rounded-2xl border border-white/10 bg-white/[0.02] p-7">
               <p className="text-[10px] font-bold uppercase tracking-[0.16em] text-gray-600 mb-3">When they say</p>
@@ -154,26 +170,50 @@ function Earn() {
         </div>
         <p className="mt-4 text-xs text-gray-400">If a client books a bigger panel than you recommended, your commission goes up to match.</p>
 
-        <div className="mt-14 rounded-2xl bg-tv-dark p-8 sm:p-10">
-          <p className="text-[11px] font-bold uppercase tracking-[0.18em] text-tv-teal mb-3">The compounding bit</p>
-          <h3 className="font-heading font-black text-white text-2xl sm:text-3xl tracking-tight mb-3">One conversation. Paid for years.</h3>
-          <p className="text-gray-400 leading-relaxed max-w-xl mb-8">A client who tests once a year on Ultimate is £40 to you every year they keep going, from one conversation you had once.</p>
-          <div className="space-y-2.5 max-w-lg">
-            {[['Year 1',20,'£40'],['Year 2',40,'£80'],['Year 3',60,'£120'],['Year 4',80,'£160'],['Year 5',100,'£200']].map(([y,w,v],i)=>(
-              <div key={i} className="flex items-center gap-4">
-                <span className="w-14 text-[11px] font-bold text-gray-500 uppercase tracking-wider">{y}</span>
-                <div className="h-8 rounded-lg bg-gradient-to-r from-tv-teal to-tv-teal/40" style={{width:`${w}%`}} />
-                <b className="font-heading font-black text-white text-sm">{v}</b>
-              </div>
-            ))}
-          </div>
-          <div className="mt-9 grid sm:grid-cols-3 gap-3">
-            {[['£400','10 Ultimate clients, per year'],['£800','20 Ultimate clients, per year'],['£1,600','20 Signature clients, per year']].map(([a,b],i)=>(
-              <div key={i} className="rounded-xl bg-white/5 p-6 text-center">
-                <div className="font-heading font-black text-3xl text-tv-teal tracking-[-0.04em]">{a}</div>
-                <div className="text-[11px] text-gray-500 mt-2 leading-snug">{b}</div>
-              </div>
-            ))}
+        <div className="mt-14 rounded-2xl bg-tv-dark p-8 sm:p-11 relative overflow-hidden">
+          <div className="absolute -top-32 -right-24 w-96 h-96 rounded-full bg-tv-teal/8 blur-3xl pointer-events-none" />
+          <div className="relative">
+            <p className="text-[11px] font-bold uppercase tracking-[0.18em] text-tv-teal mb-3">Earning potential</p>
+            <h3 className="font-heading font-black text-white text-2xl sm:text-4xl tracking-[-0.035em] leading-tight max-w-2xl">
+              Ten referrals a month.<br />Here is what that becomes.
+            </h3>
+            <p className="mt-5 text-gray-400 leading-relaxed max-w-xl">
+              Most customers retest every six months, so a client you refer in January tests again in July. Your commission is paid on both. Refer ten a month and the maths compounds fast.
+            </p>
+
+            <div className="mt-10 grid md:grid-cols-2 gap-4">
+              {[
+                { n:'Ultimate Panel', c:'£40', y1:'£7,200', ss:'£9,600', t:'180' },
+                { n:'Signature Panel', c:'£80', y1:'£14,400', ss:'£19,200', t:'180' }
+              ].map((p,i)=>(
+                <div key={i} className="rounded-2xl bg-white/[0.04] border border-white/10 p-7">
+                  <div className="flex items-baseline justify-between mb-7">
+                    <h4 className="font-heading font-bold text-white text-lg tracking-tight">{p.n}</h4>
+                    <span className="text-xs font-bold text-tv-teal">{p.c} per test</span>
+                  </div>
+                  <p className="text-[10px] font-bold uppercase tracking-wider text-gray-500 mb-2">Year one</p>
+                  <div className="font-heading font-black text-tv-teal text-5xl sm:text-6xl tracking-[-0.045em] leading-none mb-2">{p.y1}</div>
+                  <p className="text-xs text-gray-500 mb-7">120 clients referred &middot; {p.t} tests completed</p>
+                  <div className="pt-6 border-t border-white/10">
+                    <div className="flex items-baseline justify-between">
+                      <span className="text-xs text-gray-400">Year two onwards</span>
+                      <span className="font-heading font-bold text-white text-2xl tracking-tight">{p.ss}</span>
+                    </div>
+                    <p className="text-[11px] text-gray-600 mt-1.5">Once every client is on a six-month cycle</p>
+                  </div>
+                </div>
+              ))}
+            </div>
+
+            <div className="mt-6 rounded-xl bg-tv-teal/10 border border-tv-teal/20 p-6">
+              <p className="text-sm text-gray-300 leading-relaxed">
+                <span className="text-tv-teal font-bold">Year one is the conservative number.</span> A client referred in October has not reached their six-month retest by December, so they only count once. From year two everyone is on cycle, which is where the higher figure comes from.
+              </p>
+            </div>
+
+            <p className="mt-6 text-xs text-gray-600 leading-relaxed max-w-2xl">
+              Illustrative, based on ten referrals a month and a six-month retest cadence. Actual earnings depend on how many clients book and how often they return. Nothing here is a guarantee.
+            </p>
           </div>
         </div>
       </div>
