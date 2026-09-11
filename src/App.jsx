@@ -824,57 +824,103 @@ function Referrals({ referrals, partner }) {
 }
 
 // ============================================================
-//  PAYOUT
+//  PAYOUT — Stripe Connect
 // ============================================================
-function Payout({ partner, referrals, payouts, onRequested }) {
+function Payout({ partner, referrals, payouts, onRefresh }) {
   const [busy, setBusy] = useState(false)
+  const [err, setErr] = useState('')
   const ready = referrals.filter(r => r.status === 'confirmed')
   const owed = ready.reduce((s, r) => s + (r.commission_pence || 0), 0)
-  const THRESHOLD = 5000
-  const pending = payouts.find(p => ['requested', 'approved'].includes(p.status))
+  const paid = payouts.filter(p => p.status === 'paid')
 
-  if ((partner.commission_pence || 0) === 0) return null
+  // Check status when returning from Stripe
+  useEffect(() => {
+    if (new URLSearchParams(window.location.search).get('connect')) {
+      fetch(WORKER + '/partner-connect-status', {
+        method:'POST', mode:'cors', credentials:'omit',
+        headers:{'Content-Type':'application/json'},
+        body: JSON.stringify({ auth_user_id: partner.auth_user_id })
+      }).then(()=>{ window.history.replaceState({}, '', window.location.pathname); onRefresh() })
+    }
+  }, [])
 
-  const request = async () => {
-    setBusy(true)
-    const { error } = await supabase.from('partner_payouts').insert({
-      partner_id: partner.id, amount_pence: owed, referral_count: ready.length, status: 'requested'
-    })
-    setBusy(false)
-    if (!error) onRequested()
+  if ((partner.commission_pence || 0) === 0 && !partner.payouts_enabled) return null
+
+  const connect = async () => {
+    setBusy(true); setErr('')
+    try {
+      const r = await fetch(WORKER + '/partner-connect', {
+        method:'POST', mode:'cors', credentials:'omit',
+        headers:{'Content-Type':'application/json'},
+        body: JSON.stringify({ auth_user_id: partner.auth_user_id, return_url: window.location.origin })
+      })
+      const d = await r.json()
+      if (d.error) throw new Error(d.error)
+      window.location.href = d.url
+    } catch (e) { setErr(e.message || 'Could not start setup'); setBusy(false) }
   }
 
-  return (
-    <div className="bg-white rounded-2xl border border-gray-100 p-5 sm:p-6 mt-6">
-      <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
-        <div>
-          <h2 className="font-heading font-bold text-gray-900">Payout</h2>
-          {pending ? (
-            <p className="text-sm text-gray-500 mt-1">
-              {gbp(pending.amount_pence)} requested on {fmtDate(pending.created_at)}. We pay within 5 working days.
-            </p>
-          ) : owed >= THRESHOLD ? (
-            <p className="text-sm text-gray-500 mt-1">{gbp(owed)} ready across {ready.length} referral{ready.length === 1 ? '' : 's'}.</p>
-          ) : (
-            <p className="text-sm text-gray-500 mt-1">
-              {gbp(owed)} earned. Payouts are available once you reach {gbp(THRESHOLD)}.
-            </p>
+  // --- Not set up yet ---
+  if (!partner.payouts_enabled) return (
+    <div className="rounded-2xl border-2 border-tv-teal/30 bg-tv-teal/[0.04] p-6 sm:p-8 mt-6">
+      <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-5">
+        <div className="max-w-lg">
+          <h2 className="font-heading font-bold text-gray-900 text-lg mb-1.5">
+            {partner.stripe_account_id ? 'Finish setting up payouts' : 'Set up payouts'}
+          </h2>
+          <p className="text-sm text-gray-500 leading-relaxed">
+            {owed > 0
+              ? `You have ${gbp(owed)} waiting. Set up payouts and we'll send it.`
+              : 'Do this now so your first commission can be paid without delay.'}
+            {' '}Takes about five minutes. Stripe handles it securely and we never see your bank details.
+          </p>
+          {partner.connect_requirements && (
+            <p className="text-xs text-amber-600 mt-3">Stripe still needs: {partner.connect_requirements}</p>
           )}
+          {err && <p className="text-xs text-red-600 mt-3">{err}</p>}
         </div>
-        {!pending && owed >= THRESHOLD && (
-          <button onClick={request} disabled={busy}
-            className="shrink-0 px-6 py-3 rounded-xl bg-tv-dark text-white font-bold text-sm hover:bg-gray-800 transition-colors disabled:opacity-50">
-            {busy ? 'Requesting…' : `Request ${gbp(owed)}`}
-          </button>
-        )}
+        <button onClick={connect} disabled={busy}
+          className="shrink-0 px-7 py-3.5 rounded-xl bg-tv-teal text-tv-dark font-bold text-sm hover:bg-tv-teal-dark transition-colors disabled:opacity-50">
+          {busy ? 'Opening…' : partner.stripe_account_id ? 'Continue setup' : 'Set up payouts'}
+        </button>
       </div>
-      {payouts.filter(p => p.status === 'paid').length > 0 && (
-        <div className="mt-5 pt-5 border-t border-gray-50">
+    </div>
+  )
+
+  // --- Live ---
+  return (
+    <div className="rounded-2xl border border-gray-100 bg-white p-6 sm:p-8 mt-6">
+      <div className="flex flex-col sm:flex-row sm:items-start sm:justify-between gap-5">
+        <div>
+          <div className="flex items-center gap-2.5 mb-2">
+            <span className="w-2 h-2 rounded-full bg-tv-teal" />
+            <h2 className="font-heading font-bold text-gray-900 text-lg">Payouts active</h2>
+          </div>
+          {owed > 0 ? (
+            <p className="text-sm text-gray-500 leading-relaxed max-w-md">
+              <b className="text-gray-900">{gbp(owed)}</b> across {ready.length} referral{ready.length===1?'':'s'} will be sent in the next payment run. Payments go out monthly, straight to your bank.
+            </p>
+          ) : (
+            <p className="text-sm text-gray-500 max-w-md">Nothing owed right now. Anything you earn is paid automatically in the next monthly run.</p>
+          )}
+          <p className="text-xs text-gray-400 mt-3">We self-bill, so there is no invoice for you to send.</p>
+        </div>
+        {owed > 0 && <div className="shrink-0 text-right">
+          <div className="font-heading font-black text-3xl text-tv-teal tracking-tight">{gbp(owed)}</div>
+          <div className="text-[11px] text-gray-400 mt-1">next payment</div>
+        </div>}
+      </div>
+
+      {paid.length > 0 && (
+        <div className="mt-7 pt-6 border-t border-gray-50">
           <p className="text-[10px] font-bold uppercase tracking-wider text-gray-400 mb-3">Payment history</p>
-          {payouts.filter(p => p.status === 'paid').map(p => (
-            <div key={p.id} className="flex justify-between text-sm py-1.5">
-              <span className="text-gray-500">{fmtDate(p.paid_at)}</span>
-              <span className="font-medium text-gray-900">{gbp(p.amount_pence)}</span>
+          {paid.map(p => (
+            <div key={p.id} className="flex items-center justify-between py-2 text-sm">
+              <div>
+                <span className="text-gray-600">{fmtDate(p.paid_at)}</span>
+                {p.reference && <span className="font-mono text-xs text-gray-400 ml-3">{p.reference}</span>}
+              </div>
+              <span className="font-heading font-bold text-gray-900">{gbp(p.amount_pence)}</span>
             </div>
           ))}
         </div>
@@ -978,7 +1024,7 @@ export default function App() {
       <ReferClient partner={partner} rates={rates} onDone={load} />
       <Stats referrals={referrals} partner={partner} />
       <Referrals referrals={referrals} partner={partner} />
-      <Payout partner={partner} referrals={referrals} payouts={payouts} onRequested={load} />
+      <Payout partner={partner} referrals={referrals} payouts={payouts} onRefresh={load} />
       <div className="mt-6">
         <h2 className="font-heading font-bold text-gray-900 mb-1">Resources</h2>
         <p className="text-xs text-gray-400 mb-4">Everything you need to introduce TrueVitals to your clients</p>
