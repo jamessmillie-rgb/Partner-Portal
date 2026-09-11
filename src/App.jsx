@@ -31,6 +31,7 @@ function Nav({ onSignIn }) {
           <span className="text-[10px] font-bold uppercase tracking-[0.15em] text-gray-500">Partners</span>
         </div>
         <div className="flex items-center gap-2">
+          <a href="https://truevitals.co.uk" target="_blank" rel="noopener" className="hidden sm:block px-4 py-2 text-sm text-gray-400 hover:text-white transition-colors">Main site</a>
           <button onClick={onSignIn} className="px-4 py-2 text-sm text-gray-300 hover:text-white transition-colors">Sign in</button>
           <a href="#apply" className="px-5 py-2.5 rounded-lg bg-tv-teal text-tv-dark text-sm font-bold hover:bg-tv-teal-dark transition-colors">Apply</a>
         </div>
@@ -60,6 +61,7 @@ function Hero() {
         <div className="mt-9 flex flex-wrap gap-3">
           <a href="#apply" className="px-7 py-3.5 rounded-xl bg-tv-teal text-tv-dark font-bold text-sm hover:bg-tv-teal-dark transition-all hover:-translate-y-0.5">Apply in two minutes</a>
           <a href="#earn" className="px-7 py-3.5 rounded-xl border-2 border-white/15 text-white font-bold text-sm hover:border-tv-teal hover:text-tv-teal transition-colors">See what you earn</a>
+          <a href="https://truevitals.co.uk/our-report" target="_blank" rel="noopener" className="px-7 py-3.5 text-white/70 font-bold text-sm hover:text-tv-teal transition-colors">View a real report &rarr;</a>
         </div>
         <div className="mt-14 grid grid-cols-2 lg:grid-cols-4 gap-px bg-white/8 rounded-2xl overflow-hidden border border-white/8">
           {[['£20','Advanced'],['£40','Ultimate'],['£80','Signature'],['∞','Paid for life']].map(([a,b],i)=>(
@@ -142,9 +144,9 @@ function HowToSell() {
 
 function Earn() {
   const rows = [
-    ['Advanced Panel','74 biomarkers','£269','£10','£20',false],
-    ['Ultimate Panel','114 biomarkers','£349','£20','£40',true],
-    ['Signature Panel','230 biomarkers','£799','£40','£80',false]
+    ['Advanced Panel','74 biomarkers','£269','£10','£20',false,'/advanced-panel'],
+    ['Ultimate Panel','114 biomarkers','£349','£20','£40',true,'/ultimate-panel'],
+    ['Signature Panel','230 biomarkers','£799','£40','£80',false,'/signature-panel']
   ]
   return (
     <section id="earn" className="bg-white py-20 sm:py-28">
@@ -159,9 +161,12 @@ function Earn() {
               <div key={i} className={`px-6 py-4 text-[10px] font-bold uppercase tracking-wider text-gray-400 ${i>0?'text-right':''}`}>{h}</div>
             ))}
           </div>
-          {rows.map(([n,m,p,d,c,feat],i)=>(
+          {rows.map(([n,m,p,d,c,feat,href],i)=>(
             <div key={i} className={`grid grid-cols-4 items-center border-b border-gray-100 last:border-0 ${feat?'bg-tv-teal/5':''}`}>
-              <div className="px-6 py-5"><b className="font-heading font-bold text-base block tracking-tight">{n}</b><span className="text-xs text-gray-400">{m}</span></div>
+              <div className="px-6 py-5">
+                <a href={'https://truevitals.co.uk'+href} target="_blank" rel="noopener" className="font-heading font-bold text-base block tracking-tight hover:text-tv-teal-dark transition-colors">{n} <span className="text-tv-teal-dark font-normal">&#8599;</span></a>
+                <span className="text-xs text-gray-400">{m}</span>
+              </div>
               <div className="px-6 py-5 text-right font-semibold">{p}</div>
               <div className="px-6 py-5 text-right font-semibold">{d}</div>
               <div className="px-6 py-5 text-right font-heading font-black text-xl text-tv-teal-dark tracking-tight">{c}</div>
@@ -267,6 +272,49 @@ function Steps() {
 // ============================================================
 //  APPLY FORM (public)
 // ============================================================
+function SeeIt() {
+  const links = [
+    { t:'An actual report', d:'Thirty pages. Every marker explained in plain English, cross-referenced against the rest. This is what lands in your client\u2019s inbox.', a:'View a real report', href:'/our-report', big:true },
+    { t:'Compare the panels', d:'Advanced, Ultimate and Signature side by side, with exactly what each one measures.', a:'See all panels', href:'/panels' },
+    { t:'Find a clinic', d:'103 UK clinics plus at-home visits in 200+ areas. Check there is one near your clients.', a:'Search by postcode', href:'/find-a-clinic' },
+    { t:'Why we exist', d:'James was told it was in his head. One comprehensive test found a hormone at twice the upper limit.', a:'Read the story', href:'/about' },
+    { t:'How we compare', d:'Honest comparison against Medichecks, Thriva, Randox and the rest. We include where they beat us.', a:'Read the comparison', href:'/uk-blood-test-companies-compared' }
+  ]
+  return (
+    <section className="bg-gray-50 py-20 sm:py-28">
+      <div className="max-w-6xl mx-auto px-5 sm:px-8">
+        <p className="text-[11px] font-bold uppercase tracking-[0.18em] text-tv-teal-dark mb-4">See it for yourself</p>
+        <h2 className="font-heading font-black text-3xl sm:text-5xl tracking-[-0.035em] leading-[1.08] max-w-2xl">Do not take our word for it.</h2>
+        <p className="mt-6 text-gray-500 text-lg leading-relaxed max-w-2xl">
+          You are putting your name to this, so look at it properly first. Everything below is open, no sign-up needed.
+        </p>
+
+        <div className="mt-12 grid lg:grid-cols-3 gap-5">
+          <a href={'https://truevitals.co.uk'+links[0].href} target="_blank" rel="noopener"
+             className="lg:row-span-2 rounded-2xl bg-tv-dark p-8 sm:p-10 flex flex-col justify-between group relative overflow-hidden">
+            <div className="absolute -bottom-24 -right-20 w-72 h-72 rounded-full bg-tv-teal/10 blur-3xl" />
+            <div className="relative">
+              <span className="inline-block px-3 py-1.5 rounded-full bg-tv-teal/15 text-tv-teal text-[10px] font-bold uppercase tracking-[0.14em] mb-7">Start here</span>
+              <h3 className="font-heading font-black text-white text-2xl sm:text-3xl tracking-tight mb-4 leading-tight">{links[0].t}</h3>
+              <p className="text-gray-400 leading-relaxed">{links[0].d}</p>
+            </div>
+            <span className="relative mt-10 inline-flex items-center gap-2 text-tv-teal font-bold text-sm group-hover:gap-3 transition-all">{links[0].a} &rarr;</span>
+          </a>
+
+          {links.slice(1).map((l,i)=>(
+            <a key={i} href={'https://truevitals.co.uk'+l.href} target="_blank" rel="noopener"
+               className="rounded-2xl bg-white border border-gray-100 p-7 hover:border-tv-teal/40 transition-colors group">
+              <h3 className="font-heading font-bold text-lg tracking-tight mb-2.5">{l.t}</h3>
+              <p className="text-sm text-gray-500 leading-relaxed mb-5">{l.d}</p>
+              <span className="inline-flex items-center gap-1.5 text-tv-teal-dark font-bold text-xs group-hover:gap-2.5 transition-all">{l.a} &rarr;</span>
+            </a>
+          ))}
+        </div>
+      </div>
+    </section>
+  )
+}
+
 function Apply() {
   const [type, setType] = useState(null)
   const [f, setF] = useState({ name:'', email:'', business_name:'', phone:'', website:'', description:'' })
@@ -425,9 +473,9 @@ function Foot() {
       <div className="max-w-6xl mx-auto px-5 sm:px-8">
         <img src={LOGO} alt="TrueVitals" className="h-8 w-auto mb-6" />
         <div className="flex flex-wrap gap-x-7 gap-y-2 text-sm text-gray-400 mb-8">
-          <a href="https://truevitals.co.uk" className="hover:text-tv-teal transition-colors">Main site</a>
-          <a href="https://truevitals.co.uk/panels" className="hover:text-tv-teal transition-colors">Panels</a>
-          <a href="mailto:partners@truevitals.co.uk" className="hover:text-tv-teal transition-colors">partners@truevitals.co.uk</a>
+          {[['Main site','https://truevitals.co.uk'],['Panels','https://truevitals.co.uk/panels'],['Example report','https://truevitals.co.uk/our-report'],['Find a clinic','https://truevitals.co.uk/find-a-clinic'],['Our story','https://truevitals.co.uk/about'],['partners@truevitals.co.uk','mailto:partners@truevitals.co.uk']].map(([t,h],i)=>(
+            <a key={i} href={h} target="_blank" rel="noopener" className="hover:text-tv-teal transition-colors">{t}</a>
+          ))}
         </div>
         <p className="text-xs text-gray-600 leading-relaxed max-w-3xl">
           TrueVitals Group Ltd, registered in England and Wales, company number 16449605. Registered office: Ground Floor, Rear Barn, The Brookdale Centre, Knutsford, Cheshire, WA16 0SR. Commission rates correct at time of publication and may be reviewed with notice. Blood testing is not a substitute for medical advice. Partners are responsible for declaring commission income to HMRC.
@@ -504,6 +552,7 @@ function Marketing() {
       <Earn />
       <Band />
       <Steps />
+      <SeeIt />
       <Resources signedIn={false} />
       <Apply />
       <Faq />
