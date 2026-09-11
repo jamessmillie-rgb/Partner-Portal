@@ -47,9 +47,8 @@ function Hero() {
     <section className="relative bg-tv-dark overflow-hidden">
       <div className="absolute inset-0">
         <img src={IMG_HERO} alt="" className="w-full h-full object-cover object-center" />
-        <div className="absolute inset-0 bg-tv-dark/75" />
-        <div className="absolute inset-0 bg-gradient-to-r from-tv-dark via-tv-dark/90 to-tv-dark/60" />
-        <div className="absolute inset-0 bg-gradient-to-t from-tv-dark via-transparent to-tv-dark/70" />
+        <div className="absolute inset-0 bg-gradient-to-r from-tv-dark via-tv-dark/80 to-transparent" />
+        <div className="absolute inset-0 lg:hidden bg-tv-dark/55" />
       </div>
       <div className="absolute -top-40 left-1/4 w-[700px] h-[560px] rounded-full bg-tv-teal/10 blur-3xl pointer-events-none" />
 
@@ -60,7 +59,7 @@ function Hero() {
           <span className="text-tv-teal">Get paid every time.</span>
         </h1>
         <p className="mt-7 text-gray-300 text-lg leading-relaxed max-w-xl">
-          Refer your clients to the UK&rsquo;s most comprehensive blood testing. They get money off. You get paid on every test they ever book, not just the first.
+          Refer your clients, patients or audience to the UK&rsquo;s most comprehensive blood testing. They get money off. You get paid on every test they ever book, not just the first.
         </p>
         <div className="mt-9 flex flex-wrap items-center gap-3">
           <a href="#apply" className="px-7 py-3.5 rounded-xl bg-tv-teal text-tv-dark font-bold text-sm hover:bg-tv-teal-dark transition-all hover:-translate-y-0.5">Apply in two minutes</a>
@@ -91,16 +90,16 @@ function Hero() {
 function Why() {
   const items = [
     { t: 'They have already been to their GP', d: 'And come away with fifteen markers and "everything looks normal". A standard NHS panel does not include ApoB, Lp(a), fasting insulin or HOMA-IR. If the answer is not in those fifteen, it does not get found.' },
-    { t: 'They are already spending on health', d: 'Supplements, coaching, wearables, recovery. Most of it bought on guesswork. Blood work is the only thing on that list that tells them whether any of it is working.' },
-    { t: 'They trust you, not an advert', d: 'This is the whole thing. A recommendation from someone who knows their training, their diet and their history converts in a way no marketing ever will.' },
-    { t: 'It makes you better at your job', d: 'A client who tests gives you data to work from. You stop guessing at why recovery is poor or progress has stalled, and start working from real numbers.' }
+    { t: 'They are already spending on health', d: 'Supplements, coaching, wearables, therapies, recovery. Most of it bought on guesswork. Blood work is the only thing on that list that tells them whether any of it is working.' },
+    { t: 'They trust you, not an advert', d: 'This is the whole thing. A recommendation from someone whose judgement they already rely on converts in a way no advert ever will, whether you are their trainer, their clinician, or someone whose content they follow.' },
+    { t: 'It makes you better at what you do', d: 'Someone who tests gives you something real to work from. You stop guessing at why they are tired or why progress has stalled, and start from actual numbers.' }
   ]
   return (
     <section className="bg-white py-20 sm:py-28">
       <div className="max-w-6xl mx-auto px-5 sm:px-8">
         <p className="text-[11px] font-bold uppercase tracking-[0.18em] text-tv-teal-dark mb-4">Why it works</p>
         <h2 className="font-heading font-black text-3xl sm:text-5xl tracking-[-0.035em] leading-[1.08] max-w-2xl">You are not selling them anything new.</h2>
-        <p className="mt-6 text-gray-500 text-lg leading-relaxed max-w-2xl">Your clients are already tracking sleep, steps, macros and recovery. Blood work is the one measurement they are missing, and most of them know it.</p>
+        <p className="mt-6 text-gray-500 text-lg leading-relaxed max-w-2xl">The people who trust you are already tracking sleep, training and diet, and already spending on their health. Blood work is the one measurement most of them are missing.</p>
         <div className="mt-12 grid lg:grid-cols-5 gap-6 items-start">
           <div className="lg:col-span-2 rounded-2xl overflow-hidden h-[280px] lg:h-[560px]">
             <img src={IMG_YOGA} alt="" className="w-full h-full object-cover" />
@@ -123,7 +122,7 @@ function Why() {
 function HowToSell() {
   const lines = [
     { q: '"I\'m always exhausted, no matter how much I sleep."', a: 'That could be a dozen things and most of them show up on a blood test. Ferritin, thyroid, B12, vitamin D. Worth finding out rather than guessing.' },
-    { q: '"I\'ve been really strict and nothing\'s changing."', a: 'Before we change the plan again, it is worth seeing what is going on underneath. Insulin, thyroid and inflammation all affect this and none of them are visible from the outside.' },
+    { q: '"I\'ve been doing everything right and nothing\'s changing."', a: 'Before changing anything else, it is worth seeing what is going on underneath. Insulin, thyroid and inflammation all affect this and none of them are visible from the outside.' },
     { q: '"Should I be taking anything?"', a: 'Honestly, I would test first. Half the people who take supplements do not need them and the other half are missing the one that would help.' },
     { q: '"My doctor said everything was fine."', a: 'A standard NHS panel is about fifteen markers. This is a hundred and fourteen. Being told nothing is wrong is not the same as nothing being wrong.' }
   ]
@@ -132,7 +131,7 @@ function HowToSell() {
       <div className="max-w-6xl mx-auto px-5 sm:px-8">
         <p className="text-[11px] font-bold uppercase tracking-[0.18em] text-tv-teal mb-4">How to introduce it</p>
         <h2 className="font-heading font-black text-3xl sm:text-5xl tracking-[-0.035em] leading-[1.08] text-white max-w-2xl">Do not sell it.<br />Recommend it.</h2>
-        <p className="mt-6 text-gray-400 text-lg leading-relaxed max-w-2xl">The worst thing you can do is pitch. The best thing you can do is bring it up at the moment it is obviously relevant, which happens more often than you think.</p>
+        <p className="mt-6 text-gray-400 text-lg leading-relaxed max-w-2xl">Client, patient or audience, the worst thing you can do is pitch. The best thing you can do is raise it when it is obviously relevant, which happens more often than you think.</p>
         <div className="mt-10 grid grid-cols-3 gap-3">
           {[IMG_BOWL, IMG_MED, IMG_FRIENDS].map((im,i)=>(
             <div key={i} className="rounded-2xl overflow-hidden h-32 sm:h-44">
@@ -377,7 +376,7 @@ function Apply() {
 
             <label className="block text-[11px] font-bold uppercase tracking-wider text-gray-400 mb-3">What kind of partner are you?</label>
             <div className="grid sm:grid-cols-3 gap-2.5 mb-6">
-              {[['fitness','Fitness','Trainer, gym, coach'],['clinical','Clinical','GP, clinic, nutritionist'],['affiliate','Affiliate','Audience or community']].map(([v,t,d])=>(
+              {[['fitness','Fitness','Trainer, gym, coach'],['clinical','Clinical','GP, clinic, nutritionist'],['affiliate','Audience','Creator, community, brand']].map(([v,t,d])=>(
                 <button key={v} onClick={()=>setType(v)}
                   className={`px-4 py-3.5 rounded-xl border text-left transition-colors ${type===v?'border-tv-teal bg-tv-teal/5':'border-gray-200 hover:border-gray-300'}`}>
                   <span className={`block text-sm font-bold ${type===v?'text-tv-teal-dark':''}`}>{t}</span>
@@ -414,12 +413,12 @@ function Apply() {
 // ============================================================
 function Resources({ signedIn }) {
   const items = [
-    { t:'Partner pack', d:'The full programme explained. Print it, share it, or read it on your phone.', a:'Download PDF', href:'https://truevitals.co.uk/assets/truevitals-partner-programme.pdf', gated:false },
+    { t:'How we compare', d:'Honest comparison against the other UK providers, including where they beat us.', a:'Read it', href:'https://truevitals.co.uk/uk-blood-test-companies-compared', gated:false },
     { t:'Panel comparison', d:'Advanced, Ultimate and Signature side by side, with what each one measures.', a:'View', href:'https://truevitals.co.uk/panels', gated:false },
     { t:'Example report', d:'What your client actually receives. Thirty pages, plain English, every marker explained.', a:'View', href:'https://truevitals.co.uk/our-report', gated:false },
-    { t:'Logo pack', d:'PNG and SVG, light and dark. For your website, emails and socials.', a:'Download', href:'#', gated:true },
-    { t:'Client one-pager', d:'A single page you can hand to a client or attach to an email.', a:'Download', href:'#', gated:true },
-    { t:'Social templates', d:'Ready-made posts and stories you can drop your code into.', a:'Download', href:'#', gated:true }
+    { t:'Logo pack', d:'PNG and SVG, light and dark. For your website, emails and socials.', a:'Coming soon', href:'#', gated:true },
+    { t:'Client one-pager', d:'A single page you can hand over or attach to an email.', a:'Coming soon', href:'#', gated:true },
+    { t:'Social templates', d:'Ready-made posts you can drop your code into.', a:'Coming soon', href:'#', gated:true }
   ]
   return (
     <section id="resources" className={signedIn ? '' : 'bg-gray-50 py-20 sm:py-28'}>
@@ -513,10 +512,13 @@ function SignIn({ open, onClose }) {
     setBusy(true); setErr('')
     const { error } = await supabase.auth.signInWithOtp({
       email: email.trim().toLowerCase(),
-      options: { emailRedirectTo: window.location.origin }
+      options: { emailRedirectTo: window.location.origin, shouldCreateUser: false }
     })
     setBusy(false)
-    error ? setErr(error.message) : setSent(true)
+    if (error) {
+      const notFound = /not found|signups not allowed|not authorized|Invalid login/i.test(error.message)
+      setErr(notFound ? 'notfound' : error.message)
+    } else setSent(true)
   }
 
   return (
@@ -532,11 +534,17 @@ function SignIn({ open, onClose }) {
         ) : (
           <>
             <h3 className="font-heading font-bold text-white text-xl mb-1.5">Partner sign in</h3>
-            <p className="text-sm text-gray-400 mb-6">No password needed. We&rsquo;ll email you a link.</p>
+            <p className="text-sm text-gray-400 mb-6">For approved partners. No password &mdash; we email you a link.</p>
             <input type="email" value={email} onChange={e=>setEmail(e.target.value)} onKeyDown={e=>e.key==='Enter'&&send()}
               placeholder="you@business.com" autoFocus
               className="w-full px-4 py-3.5 rounded-xl bg-white/5 border border-white/10 text-white placeholder-gray-600 text-sm outline-none focus:border-tv-teal transition-colors" />
-            {err && <p className="text-red-400 text-xs mt-2.5">{err}</p>}
+            {err === 'notfound' ? (
+              <div className="mt-3 px-3.5 py-3 rounded-lg bg-white/5 border border-white/10">
+                <p className="text-sm text-gray-300 mb-1">No partner account with that email.</p>
+                <p className="text-xs text-gray-500 leading-relaxed">Sign in is for approved partners. If you have applied and not heard back, we will email you as soon as it is reviewed.</p>
+                <a href="#apply" onClick={onClose} className="inline-block mt-2.5 text-xs font-bold text-tv-teal hover:underline">Apply to join &rarr;</a>
+              </div>
+            ) : err ? <p className="text-red-400 text-xs mt-2.5">{err}</p> : null}
             <button onClick={send} disabled={busy}
               className="w-full mt-4 py-3.5 rounded-xl bg-tv-teal text-tv-dark font-bold text-sm hover:bg-tv-teal-dark transition-colors disabled:opacity-50">
               {busy ? 'Sending…' : 'Email me a link'}
@@ -934,9 +942,9 @@ function Payout({ partner, referrals, payouts, onRefresh }) {
 // ============================================================
 function Assets({ partner }) {
   const items = [
-    { name: 'TrueVitals logo pack', desc: 'PNG and SVG, light and dark', href: 'https://truevitals.co.uk/assets/truevitals-logos.zip' },
-    { name: 'Partner one-pager', desc: 'What to hand a client', href: 'https://truevitals.co.uk/assets/partner-onepager.pdf' },
-    { name: 'Panel comparison', desc: 'Advanced, Ultimate and Signature side by side', href: 'https://truevitals.co.uk/panels' }
+    { name: 'Example report', desc: 'What your client actually receives', href: 'https://truevitals.co.uk/our-report' },
+    { name: 'Panel comparison', desc: 'Advanced, Ultimate and Signature side by side', href: 'https://truevitals.co.uk/panels' },
+    { name: 'How we compare', desc: 'Honest comparison against other UK providers', href: 'https://truevitals.co.uk/uk-blood-test-companies-compared' }
   ]
   return (
     <div className="bg-white rounded-2xl border border-gray-100 p-5 sm:p-6 mt-6">
@@ -954,6 +962,158 @@ function Assets({ partner }) {
           </a>
         ))}
       </div>
+    </div>
+  )
+}
+
+// ============================================================
+//  WHAT TO SEND — pre-written, code inserted, one tap to copy
+// ============================================================
+function Scripts({ partner, referrals }) {
+  const [tab, setTab] = useState('message')
+  const [copied, setCopied] = useState(null)
+
+  // Use their most recent unused code if there is one, otherwise a placeholder
+  const latest = referrals.find(r => r.status === 'pending' && r.referral_code)
+  const CODE = latest ? latest.referral_code : '[YOUR CODE]'
+  const NAME = latest ? (latest.customer_first_name || 'there') : '[NAME]'
+
+  const copy = (text, id) => {
+    navigator.clipboard.writeText(text).then(() => {
+      setCopied(id); setTimeout(() => setCopied(null), 2000)
+    })
+  }
+
+  const T = {
+    message: [
+      { label: 'The straightforward one', body:
+`Hi ${NAME}, I mentioned getting some blood work done. I use TrueVitals — they test up to 230 markers from one blood draw at a clinic near you, and the report actually explains what everything means rather than just giving you numbers.
+
+Have a look: truevitals.co.uk
+
+I've got you a code that takes money off — ${CODE} — just enter it at checkout. Happy to go through the results with you when they land.` },
+
+      { label: 'When they are stuck', body:
+`Hi ${NAME}, thinking about what we talked about. Before we change anything else, I reckon it's worth seeing what's actually going on underneath — thyroid, iron, inflammation, insulin. None of it shows from the outside.
+
+TrueVitals do a proper panel at a clinic near you: truevitals.co.uk
+
+Use ${CODE} at checkout for money off. Send me the report when it comes through and we'll work from real numbers.` },
+
+      { label: 'When their GP said fine', body:
+`Hi ${NAME}, on what you said about your GP — a standard NHS panel is usually about fifteen markers. Being told nothing's wrong isn't quite the same as nothing being wrong.
+
+TrueVitals test up to 230: truevitals.co.uk
+
+Code ${CODE} takes money off. Worth knowing rather than wondering.` }
+    ],
+
+    email: [
+      { label: 'Introducing it', subject: 'The blood test I mentioned', body:
+`Hi ${NAME},
+
+Following up on what we discussed.
+
+The company I use is TrueVitals. A few things that made me pick them:
+
+• Proper venous blood draw at a clinic, or a nurse at your home. Not a finger-prick kit through the post.
+• Up to 230 biomarkers depending on the panel, processed by UKAS-accredited UK labs.
+• The report explains what each result means and how they relate to each other, in plain English. Every one is reviewed by a medical professional before it goes out.
+
+Have a look at an example report here: truevitals.co.uk/our-report
+And the panels here: truevitals.co.uk/panels
+
+I've arranged a code for you — ${CODE} — enter it at checkout and it comes off the price.
+
+Once the results are in, send them over and we'll go through them together.
+
+Best,
+${partner.name || ''}` },
+
+      { label: 'After a consultation', subject: 'Worth testing before we go further', body:
+`Hi ${NAME},
+
+Thanks for your time today.
+
+Before we go any further I'd suggest getting a proper blood panel done. A lot of what we talked about — energy, recovery, how you're responding to what you're already doing — is measurable, and right now we're working from how you feel rather than what's actually happening.
+
+I use TrueVitals. Clinic appointment near you, results in a few days, and a report that explains everything rather than just listing numbers.
+
+truevitals.co.uk/panels
+
+Your code is ${CODE}, which takes money off at checkout.
+
+Send me the report when it lands and we'll build the next stage around it.
+
+Best,
+${partner.name || ''}` }
+    ],
+
+    social: [
+      { label: 'Short post', body:
+`Most people have never had proper blood work done.
+
+Not the fifteen markers your GP runs. Up to 230 — thyroid, iron, hormones, inflammation, metabolic health, the lot. One appointment, one report that actually explains what it all means.
+
+I've partnered with TrueVitals so anyone here can get money off. Drop me a message and I'll sort you a code.
+
+truevitals.co.uk` },
+
+      { label: 'Story or caption', body:
+`If you're tired all the time, or doing everything right and nothing's shifting, it's worth finding out why rather than guessing.
+
+Blood work tells you. TrueVitals test up to 230 markers from one draw and explain every single one.
+
+Message me for a code — it takes money off.` }
+    ]
+  }
+
+  const tabs = [['message','Text or WhatsApp'],['email','Email'],['social','Social']]
+
+  return (
+    <div className="mt-6">
+      <div className="flex flex-col sm:flex-row sm:items-end sm:justify-between gap-3 mb-4">
+        <div>
+          <h2 className="font-heading font-bold text-gray-900">What to send</h2>
+          <p className="text-xs text-gray-400 mt-0.5">
+            {latest
+              ? <>Written for you with <span className="font-mono text-gray-600">{CODE}</span> already in. Tap to copy, edit anything you like.</>
+              : <>Refer a client above and your code drops into these automatically.</>}
+          </p>
+        </div>
+        <div className="flex gap-2">
+          {tabs.map(([k,l])=>(
+            <button key={k} onClick={()=>setTab(k)}
+              className={`px-3.5 py-2 rounded-lg text-xs font-bold transition-colors ${tab===k?'bg-tv-dark text-white':'bg-white text-gray-500 border border-gray-200 hover:border-gray-300'}`}>{l}</button>
+          ))}
+        </div>
+      </div>
+
+      <div className="space-y-3">
+        {T[tab].map((t,i)=>{
+          const full = t.subject ? `Subject: ${t.subject}\n\n${t.body}` : t.body
+          const id = tab + i
+          return (
+            <div key={id} className="rounded-2xl border border-gray-100 bg-white overflow-hidden">
+              <div className="flex items-center justify-between px-5 py-3.5 border-b border-gray-50">
+                <div>
+                  <span className="text-sm font-bold text-gray-900">{t.label}</span>
+                  {t.subject && <span className="block text-[11px] text-gray-400 mt-0.5">Subject: {t.subject}</span>}
+                </div>
+                <button onClick={()=>copy(full,id)}
+                  className={`shrink-0 px-4 py-2 rounded-lg text-xs font-bold transition-colors ${copied===id?'bg-tv-teal text-tv-dark':'bg-gray-100 text-gray-600 hover:bg-gray-200'}`}>
+                  {copied===id ? 'Copied' : 'Copy'}
+                </button>
+              </div>
+              <pre className="px-5 py-4 text-[13px] text-gray-600 leading-relaxed whitespace-pre-wrap font-sans">{t.body}</pre>
+            </div>
+          )
+        })}
+      </div>
+
+      <p className="text-xs text-gray-400 mt-4 leading-relaxed">
+        Change these however you like &mdash; they sound better in your own words. Two things to keep: do not promise a test will find anything specific, and do not suggest it replaces seeing a doctor.
+      </p>
     </div>
   )
 }
@@ -1025,6 +1185,7 @@ export default function App() {
       <Stats referrals={referrals} partner={partner} />
       <Referrals referrals={referrals} partner={partner} />
       <Payout partner={partner} referrals={referrals} payouts={payouts} onRefresh={load} />
+      <Scripts partner={partner} referrals={referrals} />
       <div className="mt-6">
         <h2 className="font-heading font-bold text-gray-900 mb-1">Resources</h2>
         <p className="text-xs text-gray-400 mb-4">Everything you need to introduce TrueVitals to your clients</p>
