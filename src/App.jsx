@@ -416,9 +416,9 @@ function Resources({ signedIn }) {
     { t:'How we compare', d:'Honest comparison against the other UK providers, including where they beat us.', a:'Read it', href:'https://truevitals.co.uk/uk-blood-test-companies-compared', gated:false },
     { t:'Panel comparison', d:'Advanced, Ultimate and Signature side by side, with what each one measures.', a:'View', href:'https://truevitals.co.uk/panels', gated:false },
     { t:'Example report', d:'What your client actually receives. Plain English, every marker explained.', a:'View', href:'https://truevitals.co.uk/our-report', gated:false },
-    { t:'Logo pack', d:'PNG and SVG, light and dark. For your website, emails and socials.', a:'Coming soon', href:'#', gated:true },
-    { t:'Client one-pager', d:'A single page you can hand over or attach to an email.', a:'Coming soon', href:'#', gated:true },
-    { t:'Social templates', d:'Ready-made posts you can drop your code into.', a:'Coming soon', href:'#', gated:true }
+    { t:'Client flyer', d:'A5, print-ready. Leave them on a reception desk or hand one over after a session.', a:'Download PDF', href:'/TrueVitals-Partner-Flyer-A5.pdf', gated:true },
+    { t:'Social post', d:'For Instagram or LinkedIn. Ends with "message me for a code", so nothing leaks.', a:'Download PNG', href:'/TrueVitals-Partner-Social-Post.png', gated:true },
+    { t:'Story graphic', d:'Full-screen story format, sized with safe margins top and bottom.', a:'Download PNG', href:'/TrueVitals-Partner-Story.png', gated:true }
   ]
   return (
     <section id="resources" className={signedIn ? '' : 'bg-gray-50 py-20 sm:py-28'}>
