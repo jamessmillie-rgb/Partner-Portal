@@ -35,7 +35,7 @@ function Nav({ onSignIn }) {
         <div className="flex items-center gap-2">
           <a href="https://truevitals.co.uk" target="_blank" rel="noopener" className="hidden sm:block px-4 py-2 text-sm text-gray-400 hover:text-white transition-colors">Main site</a>
           <button onClick={onSignIn} className="px-4 py-2 text-sm text-gray-300 hover:text-white transition-colors">Sign in</button>
-          <a href="#apply" className="px-5 py-2.5 rounded-lg bg-tv-teal text-tv-dark text-sm font-bold hover:bg-tv-teal-dark transition-colors">Apply</a>
+          <a href="https://truevitals.co.uk/partners" target="_blank" rel="noopener" className="px-5 py-2.5 rounded-lg bg-tv-teal text-tv-dark text-sm font-bold hover:bg-tv-teal-dark transition-colors">Apply</a>
         </div>
       </div>
     </header>
@@ -62,7 +62,7 @@ function Hero() {
           Refer your clients, patients or audience to the UK&rsquo;s most comprehensive blood testing. They get money off. You get paid on every test they ever book, not just the first.
         </p>
         <div className="mt-9 flex flex-wrap items-center gap-3">
-          <a href="#apply" className="px-7 py-3.5 rounded-xl bg-tv-teal text-tv-dark font-bold text-sm hover:bg-tv-teal-dark transition-all hover:-translate-y-0.5">Apply in two minutes</a>
+          <a href="https://truevitals.co.uk/partners" target="_blank" rel="noopener" className="px-7 py-3.5 rounded-xl bg-tv-teal text-tv-dark font-bold text-sm hover:bg-tv-teal-dark transition-all hover:-translate-y-0.5">Apply in two minutes</a>
           <a href="#earn" className="px-7 py-3.5 rounded-xl border-2 border-white/20 text-white font-bold text-sm hover:border-tv-teal hover:text-tv-teal transition-colors">See what you earn</a>
           <a href="https://truevitals.co.uk/our-report" target="_blank" rel="noopener" className="px-5 py-3.5 text-white/70 font-bold text-sm hover:text-tv-teal transition-colors">View a real report &rarr;</a>
         </div>
@@ -75,7 +75,7 @@ function Hero() {
         </a>
 
         <div className="mt-16 grid grid-cols-2 lg:grid-cols-4 gap-px bg-white/10 rounded-2xl overflow-hidden border border-white/10 backdrop-blur">
-          {[['£20','Advanced'],['£40','Ultimate'],['£80','Signature'],['∞','Paid for life']].map(([a,b],i)=>(
+          {[['230','Biomarkers'],['103','UK clinics'],['4 days','Typical report'],['∞','Paid for life']].map(([a,b],i)=>(
             <div key={i} className="bg-tv-dark/85 px-6 py-7">
               <div className="font-heading font-black text-3xl text-tv-teal tracking-[-0.04em] leading-none">{a}</div>
               <div className="text-[11px] font-semibold uppercase tracking-wider text-gray-400 mt-2.5">{b}</div>
@@ -154,81 +154,59 @@ function HowToSell() {
 }
 
 function Earn() {
-  const rows = [
-    ['Advanced Panel','74 biomarkers','£269','£10','£20',false,'/advanced-panel'],
-    ['Ultimate Panel','114 biomarkers','£349','£20','£40',true,'/ultimate-panel'],
-    ['Signature Panel','230 biomarkers','£799','£40','£80',false,'/signature-panel']
-  ]
+  const [n, setN] = useState(10)
+  const LOW = 80, HIGH = 160   // per client per year, two tests
+  const gbpWhole = (v) => '£' + v.toLocaleString('en-GB')
+
   return (
     <section id="earn" className="bg-white py-20 sm:py-28">
       <div className="max-w-6xl mx-auto px-5 sm:px-8">
         <p className="text-[11px] font-bold uppercase tracking-[0.18em] text-tv-teal-dark mb-4">What you earn</p>
         <h2 className="font-heading font-black text-3xl sm:text-5xl tracking-[-0.035em] leading-[1.08] max-w-2xl">Paid on every test.<br />Not just the first.</h2>
-        <p className="mt-6 text-gray-500 text-lg leading-relaxed max-w-2xl">Most referral programmes pay you once and forget you. Ours pays every time that client books again, for as long as they remain a customer.</p>
+        <p className="mt-6 text-gray-500 text-lg leading-relaxed max-w-2xl">
+          Most referral programmes pay you once and forget you. Ours pays every time that client books again, for as long as they remain a customer.
+        </p>
 
-        <div className="mt-12 rounded-2xl border border-gray-200 overflow-hidden">
-          <div className="grid grid-cols-4 bg-gray-50 border-b border-gray-200">
-            {['Panel','Price','They save','You earn'].map((h,i)=>(
-              <div key={i} className={`px-6 py-4 text-[10px] font-bold uppercase tracking-wider text-gray-400 ${i>0?'text-right':''}`}>{h}</div>
-            ))}
-          </div>
-          {rows.map(([n,m,p,d,c,feat,href],i)=>(
-            <div key={i} className={`grid grid-cols-4 items-center border-b border-gray-100 last:border-0 ${feat?'bg-tv-teal/5':''}`}>
-              <div className="px-6 py-5">
-                <a href={'https://truevitals.co.uk'+href} target="_blank" rel="noopener" className="font-heading font-bold text-base block tracking-tight hover:text-tv-teal-dark transition-colors">{n} <span className="text-tv-teal-dark font-normal">&#8599;</span></a>
-                <span className="text-xs text-gray-400">{m}</span>
-              </div>
-              <div className="px-6 py-5 text-right font-semibold">{p}</div>
-              <div className="px-6 py-5 text-right font-semibold">{d}</div>
-              <div className="px-6 py-5 text-right font-heading font-black text-xl text-tv-teal-dark tracking-tight">{c}</div>
-            </div>
-          ))}
-        </div>
-        <p className="mt-4 text-xs text-gray-400">If a client books a bigger panel than you recommended, your commission goes up to match.</p>
-
-        <div className="mt-14 rounded-2xl bg-tv-dark p-8 sm:p-11 relative overflow-hidden">
+        <div className="mt-12 rounded-2xl bg-tv-dark p-8 sm:p-11 relative overflow-hidden">
           <div className="absolute -top-32 -right-24 w-96 h-96 rounded-full bg-tv-teal/8 blur-3xl pointer-events-none" />
           <div className="relative">
-            <p className="text-[11px] font-bold uppercase tracking-[0.18em] text-tv-teal mb-3">Earning potential</p>
-            <h3 className="font-heading font-black text-white text-2xl sm:text-4xl tracking-[-0.035em] leading-tight max-w-2xl">
-              Ten referrals a month.<br />Here is what that becomes.
-            </h3>
-            <p className="mt-5 text-gray-400 leading-relaxed max-w-xl">
-              Most customers retest every six months, so a client you refer in January tests again in July. Your commission is paid on both. Refer ten a month and the maths compounds fast.
-            </p>
+            <p className="text-[11px] font-bold uppercase tracking-[0.18em] text-tv-teal mb-3">Revenue calculator</p>
+            <h3 className="font-heading font-black text-white text-2xl sm:text-3xl tracking-tight mb-2">What could this be worth to you?</h3>
+            <p className="text-gray-400 leading-relaxed max-w-xl mb-9">Move the slider to the number of clients you would realistically refer in a year.</p>
 
-            <div className="mt-10 grid md:grid-cols-2 gap-4">
-              {[
-                { n:'Ultimate Panel', c:'£40', y1:'£7,200', ss:'£9,600', t:'180' },
-                { n:'Signature Panel', c:'£80', y1:'£14,400', ss:'£19,200', t:'180' }
-              ].map((p,i)=>(
-                <div key={i} className="rounded-2xl bg-white/[0.04] border border-white/10 p-7">
-                  <div className="flex items-baseline justify-between mb-7">
-                    <h4 className="font-heading font-bold text-white text-lg tracking-tight">{p.n}</h4>
-                    <span className="text-xs font-bold text-tv-teal">{p.c} per test</span>
-                  </div>
-                  <p className="text-[10px] font-bold uppercase tracking-wider text-gray-500 mb-2">Year one</p>
-                  <div className="font-heading font-black text-tv-teal text-5xl sm:text-6xl tracking-[-0.045em] leading-none mb-2">{p.y1}</div>
-                  <p className="text-xs text-gray-500 mb-7">120 clients referred &middot; {p.t} tests completed</p>
-                  <div className="pt-6 border-t border-white/10">
-                    <div className="flex items-baseline justify-between">
-                      <span className="text-xs text-gray-400">Year two onwards</span>
-                      <span className="font-heading font-bold text-white text-2xl tracking-tight">{p.ss}</span>
-                    </div>
-                    <p className="text-[11px] text-gray-600 mt-1.5">Once every client is on a six-month cycle</p>
-                  </div>
+            <div className="grid lg:grid-cols-2 gap-10 lg:gap-14 items-center">
+              <div>
+                <div className="flex items-baseline justify-between mb-4">
+                  <span className="text-[11px] font-bold uppercase tracking-wider text-gray-500">Clients referred per year</span>
+                  <b className="font-heading font-black text-3xl text-white tracking-[-0.04em] leading-none">{n}</b>
                 </div>
-              ))}
+                <input type="range" min="1" max="200" value={n} onChange={e=>setN(parseInt(e.target.value,10))}
+                  className="w-full h-1.5 rounded-full bg-white/15 appearance-none cursor-pointer accent-tv-teal" />
+                <div className="flex justify-between mt-2.5 text-[11px] text-gray-600 font-semibold">
+                  <span>1</span><span>50</span><span>100</span><span>150</span><span>200</span>
+                </div>
+                <div className="mt-6 flex items-center gap-3">
+                  <label className="text-xs text-gray-500 font-semibold">Or type a number</label>
+                  <input type="number" min="1" max="2000" value={n}
+                    onChange={e=>setN(Math.max(1,Math.min(2000,parseInt(e.target.value,10)||1)))}
+                    className="w-24 px-3 py-2 rounded-lg bg-white/5 border border-white/10 text-white text-sm font-bold outline-none focus:border-tv-teal" />
+                </div>
+              </div>
+
+              <div className="rounded-2xl border border-tv-teal/25 bg-tv-teal/[0.05] p-8 text-center">
+                <p className="text-[11px] font-bold uppercase tracking-[0.2em] text-tv-teal mb-4">Your annual revenue</p>
+                <div className="font-heading font-black text-tv-teal text-4xl sm:text-5xl tracking-[-0.05em] leading-none whitespace-nowrap">
+                  {gbpWhole(n*LOW)} – {gbpWhole(n*HIGH)}
+                </div>
+                <p className="text-[11px] font-semibold uppercase tracking-wider text-gray-500 mt-3">Every year</p>
+                <p className="text-sm text-gray-400 leading-relaxed mt-5 pt-5 border-t border-white/10">
+                  And those clients keep testing. In year two you earn from them <span className="text-white font-semibold">again</span>, on top of everyone new you refer.
+                </p>
+              </div>
             </div>
 
-            <div className="mt-6 rounded-xl bg-tv-teal/10 border border-tv-teal/20 p-6">
-              <p className="text-sm text-gray-300 leading-relaxed">
-                <span className="text-tv-teal font-bold">Year one is the conservative number.</span> A client referred in October has not reached their six-month retest by December, so they only count once. From year two everyone is on cycle, which is where the higher figure comes from.
-              </p>
-            </div>
-
-            <p className="mt-6 text-xs text-gray-600 leading-relaxed max-w-2xl">
-              Illustrative, based on ten referrals a month and a six-month retest cadence. Actual earnings depend on how many clients book and how often they return. Nothing here is a guarantee.
+            <p className="mt-8 text-xs text-gray-600 leading-relaxed max-w-2xl">
+              Based on each client testing twice a year, which is the typical pattern. The range reflects the panel they choose. Illustrative, not a guarantee — what you earn depends on how many clients book and how often they return. Exact rates per panel are shown in your dashboard once you are approved.
             </p>
           </div>
         </div>
@@ -327,90 +305,44 @@ function SeeIt() {
   )
 }
 
-function Apply() {
-  const [type, setType] = useState(null)
-  const [f, setF] = useState({ name:'', email:'', business_name:'', phone:'', website:'', description:'' })
-  const [busy, setBusy] = useState(false)
-  const [err, setErr] = useState('')
-  const [done, setDone] = useState(false)
-  const set = (k) => (e) => setF({ ...f, [k]: e.target.value })
-
-  const submit = async () => {
-    if (!type) { setErr('Choose what kind of partner you are'); return }
-    if (!f.name.trim()) { setErr('Enter your name'); return }
-    if (!f.email.includes('@')) { setErr('Enter a valid email address'); return }
-    setBusy(true); setErr('')
-    try {
-      const r = await fetch(WORKER + '/partner-apply', {
-        method:'POST', mode:'cors', credentials:'omit',
-        headers:{'Content-Type':'application/json'},
-        body: JSON.stringify({ ...f, partner_type: type })
-      })
-      if (r.status === 409) throw new Error('There is already an application under that email. We will be in touch.')
-      if (!r.ok) throw new Error('Something went wrong. Try again, or email partners@truevitals.co.uk')
-      setDone(true)
-    } catch (e) { setErr(e.message) }
-    setBusy(false)
-  }
-
-  const inp = "w-full px-4 py-3.5 rounded-xl border border-gray-200 text-sm outline-none focus:border-tv-teal transition-colors"
-
+function Apply({ onSignIn }) {
   return (
     <section id="apply" className="bg-white py-20 sm:py-28 border-t border-gray-100">
-      <div className="max-w-2xl mx-auto px-5 sm:px-8">
+      <div className="max-w-3xl mx-auto px-5 sm:px-8">
         <div className="text-center mb-10">
-          <p className="text-[11px] font-bold uppercase tracking-[0.18em] text-tv-teal-dark mb-4">Apply</p>
-          <h2 className="font-heading font-black text-3xl sm:text-4xl tracking-[-0.035em]">Join the programme</h2>
-          <p className="mt-4 text-gray-500">Free to join. No minimum, no contract, nothing to pay.</p>
+          <p className="text-[11px] font-bold uppercase tracking-[0.18em] text-tv-teal-dark mb-4">Getting started</p>
+          <h2 className="font-heading font-black text-3xl sm:text-4xl tracking-[-0.035em]">Already applied?</h2>
+          <p className="mt-4 text-gray-500 max-w-lg mx-auto leading-relaxed">
+            We review every application by hand. Once you are approved we will email you, and you sign in here with the same address. No password, we send you a link.
+          </p>
         </div>
 
-        {done ? (
-          <div className="rounded-2xl border border-tv-teal/30 bg-tv-teal/5 p-12 text-center">
-            <div className="w-14 h-14 rounded-full bg-tv-teal/15 text-tv-teal-dark text-2xl flex items-center justify-center mx-auto mb-5">✓</div>
-            <h3 className="font-heading font-bold text-xl mb-2.5">Application received</h3>
-            <p className="text-gray-500 max-w-sm mx-auto leading-relaxed">We review every application by hand and will be in touch within a couple of working days.</p>
-          </div>
-        ) : (
-          <div className="rounded-2xl border border-gray-200 p-7 sm:p-9">
-            {err && <div className="mb-6 px-4 py-3.5 rounded-xl bg-red-50 border border-red-100 text-red-600 text-sm">{err}</div>}
+        <div className="grid sm:grid-cols-2 gap-4">
+          <button onClick={onSignIn}
+            className="rounded-2xl bg-tv-dark p-8 text-left group transition-transform hover:-translate-y-0.5">
+            <div className="w-10 h-10 rounded-xl bg-tv-teal/15 text-tv-teal flex items-center justify-center mb-5 text-lg">&rarr;</div>
+            <h3 className="font-heading font-bold text-white text-lg tracking-tight mb-2">Sign in</h3>
+            <p className="text-sm text-gray-400 leading-relaxed">You have been approved and want to refer a client, grab your assets or check what you have earned.</p>
+            <span className="inline-block mt-5 text-xs font-bold text-tv-teal">Email me a link &rarr;</span>
+          </button>
 
-            <label className="block text-[11px] font-bold uppercase tracking-wider text-gray-400 mb-3">What kind of partner are you?</label>
-            <div className="grid sm:grid-cols-3 gap-2.5 mb-6">
-              {[['fitness','Fitness','Trainer, gym, coach'],['clinical','Clinical','GP, clinic, nutritionist'],['affiliate','Audience','Creator, community, brand']].map(([v,t,d])=>(
-                <button key={v} onClick={()=>setType(v)}
-                  className={`px-4 py-3.5 rounded-xl border text-left transition-colors ${type===v?'border-tv-teal bg-tv-teal/5':'border-gray-200 hover:border-gray-300'}`}>
-                  <span className={`block text-sm font-bold ${type===v?'text-tv-teal-dark':''}`}>{t}</span>
-                  <span className="block text-[11px] text-gray-400 mt-0.5">{d}</span>
-                </button>
-              ))}
-            </div>
+          <a href="https://truevitals.co.uk/partners" target="_blank" rel="noopener"
+            className="rounded-2xl border-2 border-gray-100 p-8 hover:border-tv-teal/40 transition-colors block">
+            <div className="w-10 h-10 rounded-xl bg-tv-teal/10 text-tv-teal-dark flex items-center justify-center mb-5 text-lg">+</div>
+            <h3 className="font-heading font-bold text-lg tracking-tight mb-2">Not applied yet</h3>
+            <p className="text-sm text-gray-500 leading-relaxed">Takes two minutes. Free to join, no minimum, no contract, and we come back within a couple of working days.</p>
+            <span className="inline-block mt-5 text-xs font-bold text-tv-teal-dark">Apply now &rarr;</span>
+          </a>
+        </div>
 
-            <div className="grid sm:grid-cols-2 gap-3 mb-3">
-              <input className={inp} placeholder="Your name" value={f.name} onChange={set('name')} />
-              <input className={inp} placeholder="Email" type="email" value={f.email} onChange={set('email')} />
-            </div>
-            <div className="grid sm:grid-cols-2 gap-3 mb-3">
-              <input className={inp} placeholder="Business name (optional)" value={f.business_name} onChange={set('business_name')} />
-              <input className={inp} placeholder="Phone (optional)" value={f.phone} onChange={set('phone')} />
-            </div>
-            <input className={inp + ' mb-3'} placeholder="Website or social (optional)" value={f.website} onChange={set('website')} />
-            <textarea className={inp + ' min-h-28 resize-y leading-relaxed'} placeholder="Tell us about your business. Who do you work with, and why would blood testing help them?" value={f.description} onChange={set('description')} />
-
-            <button onClick={submit} disabled={busy}
-              className="w-full mt-5 py-4 rounded-xl bg-tv-teal text-tv-dark font-bold text-sm hover:bg-tv-teal-dark transition-colors disabled:opacity-50">
-              {busy ? 'Sending…' : 'Submit application'}
-            </button>
-            <p className="text-xs text-gray-400 text-center mt-4">We&rsquo;ll email you either way. No obligation.</p>
-          </div>
-        )}
+        <p className="text-center text-xs text-gray-400 mt-8 leading-relaxed">
+          Applied but not heard back? Email <a href="mailto:partners@truevitals.co.uk" className="text-tv-teal-dark font-semibold">partners@truevitals.co.uk</a> and we will chase it.
+        </p>
       </div>
     </section>
   )
 }
 
-// ============================================================
-//  RESOURCES — public preview and full version when signed in
-// ============================================================
 function Resources({ signedIn }) {
   const items = [
     { t:'How we compare', d:'Honest comparison against the other UK providers, including where they beat us.', a:'Read it', href:'https://truevitals.co.uk/uk-blood-test-companies-compared', gated:false },
@@ -432,7 +364,7 @@ function Resources({ signedIn }) {
           {items.map((it,i)=>{
             const locked = it.gated && !signedIn
             return (
-              <a key={i} href={locked ? '#apply' : it.href} target={locked?'_self':'_blank'} rel="noopener"
+              <a key={i} href={locked ? 'https://truevitals.co.uk/partners' : it.href} target={locked?'_self':'_blank'} rel="noopener"
                 className={`rounded-2xl border p-7 transition-colors block ${locked?'border-gray-100 bg-gray-50/50':'border-gray-100 bg-white hover:border-tv-teal/40'}`}>
                 <div className="flex items-start justify-between mb-5">
                   <div className={`w-9 h-9 rounded-xl flex items-center justify-center ${locked?'bg-gray-100 text-gray-400':'bg-tv-teal/10 text-tv-teal-dark'}`}>
@@ -542,7 +474,7 @@ function SignIn({ open, onClose }) {
               <div className="mt-3 px-3.5 py-3 rounded-lg bg-white/5 border border-white/10">
                 <p className="text-sm text-gray-300 mb-1">No partner account with that email.</p>
                 <p className="text-xs text-gray-500 leading-relaxed">Sign in is for approved partners. If you have applied and not heard back, we will email you as soon as it is reviewed.</p>
-                <a href="#apply" onClick={onClose} className="inline-block mt-2.5 text-xs font-bold text-tv-teal hover:underline">Apply to join &rarr;</a>
+                <a href="https://truevitals.co.uk/partners" target="_blank" rel="noopener" className="inline-block mt-2.5 text-xs font-bold text-tv-teal hover:underline">Apply to join &rarr;</a>
               </div>
             ) : err ? <p className="text-red-400 text-xs mt-2.5">{err}</p> : null}
             <button onClick={send} disabled={busy}
@@ -550,7 +482,7 @@ function SignIn({ open, onClose }) {
               {busy ? 'Sending…' : 'Email me a link'}
             </button>
             <p className="text-xs text-gray-600 mt-5 text-center">
-              Not a partner yet? <a href="#apply" onClick={onClose} className="text-tv-teal hover:underline">Apply here</a>
+              Not a partner yet? <a href="https://truevitals.co.uk/partners" target="_blank" rel="noopener" className="text-tv-teal hover:underline">Apply here</a>
             </p>
           </>
         )}
@@ -575,7 +507,7 @@ function Marketing() {
       <Steps />
       <SeeIt />
       <Resources signedIn={false} />
-      <Apply />
+      <Apply onSignIn={()=>setSignIn(true)} />
       <Faq />
       <Foot />
       <SignIn open={signIn} onClose={()=>setSignIn(false)} />
