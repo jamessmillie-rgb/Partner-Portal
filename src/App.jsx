@@ -593,7 +593,10 @@ function Shell({ partner, children, onSignOut }) {
 //  REFER A CLIENT
 // ============================================================
 
-function ReferClient({ partner, rates, onDone }) {
+function ReferClient({ partner, rates, staff, onDone }) {
+  const staffKey = 'tv_partner_staff_' + partner.id
+  const [who, setWho] = useState(() => { try { return localStorage.getItem(staffKey) || '' } catch (e) { return '' } })
+  useEffect(() => { try { if (who) localStorage.setItem(staffKey, who) } catch (e) {} }, [who])
   const [name, setName] = useState('')
   const [email, setEmail] = useState('')
   const [panel, setPanel] = useState('ultimate')
@@ -615,6 +618,7 @@ function ReferClient({ partner, rates, onDone }) {
           auth_user_id: partner.auth_user_id,
           customer_name: name.trim(),
           customer_email: email.trim().toLowerCase(),
+          referred_by_staff: who || null,
           panel: panel
         })
       })
@@ -686,6 +690,19 @@ function ReferClient({ partner, rates, onDone }) {
             className="px-4 py-3 rounded-xl bg-white/5 border border-white/10 text-white placeholder-gray-600 text-sm outline-none focus:border-tv-teal transition-colors" />
         </div>
 
+        {staff.length > 0 && (
+          <>
+            <p className="text-[10px] font-bold uppercase tracking-wider text-gray-500 mb-2 mt-5">Who is referring?</p>
+            <div className="flex flex-wrap gap-2 mb-2">
+              {staff.filter(m => m.active !== false).map(m => (
+                <button key={m.id} onClick={() => setWho(m.name)}
+                  className={`px-3.5 py-2 rounded-lg border text-xs font-bold transition-colors ${who === m.name ? 'border-tv-teal bg-tv-teal/10 text-tv-teal' : 'border-white/10 bg-white/5 text-gray-300 hover:border-white/20'}`}>{m.name}</button>
+              ))}
+            </div>
+            <p className="text-[11px] text-gray-600 mb-3">Remembered on this device, so you only pick once. Add or remove people under Team below.</p>
+          </>
+        )}
+
         <p className="text-[10px] font-bold uppercase tracking-wider text-gray-500 mb-2 mt-5">Which panel are you recommending?</p>
         <div className="grid sm:grid-cols-3 gap-2 mb-5">
           {rates.map(r => (
@@ -710,6 +727,76 @@ function ReferClient({ partner, rates, onDone }) {
           {busy ? 'Creating\u2026' : 'Create their code'}
         </button>
       </div>
+    </div>
+  )
+}
+
+
+// ============================================================
+//  TEAM (who inside the business referred whom)
+// ============================================================
+function Team({ partner, staff, staffSummary, onChange }) {
+  const [name, setName] = useState('')
+  const [busy, setBusy] = useState(false)
+  const [err, setErr] = useState('')
+  const isAffiliate = partner.tier === 'affiliate'
+  const slugify = (t) => String(t || '').toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/^-|-$/g, '').slice(0, 30)
+
+  const add = async () => {
+    const n = name.trim(); if (!n) return
+    setBusy(true); setErr('')
+    const { error } = await supabase.from('partner_staff').insert({ partner_id: partner.id, name: n, slug: slugify(n) })
+    setBusy(false)
+    if (error) setErr(/duplicate/i.test(error.message) ? 'That name is already on your team.' : error.message)
+    else { setName(''); onChange() }
+  }
+  const toggle = async (m) => { await supabase.from('partner_staff').update({ active: !m.active }).eq('id', m.id); onChange() }
+
+  const rows = staffSummary || []
+  const total = rows.reduce((a, r) => a + Number(r.commission_pence || 0), 0)
+
+  return (
+    <div className="bg-white rounded-2xl border border-gray-100 p-6 sm:p-8 mb-6">
+      <div className="flex flex-wrap justify-between items-start gap-3 mb-1">
+        <div>
+          <h2 className="font-heading font-bold text-gray-900">Team</h2>
+          <p className="text-xs text-gray-400 mt-1 max-w-md leading-relaxed">Add the people who refer clients. Each referral is tagged to whoever made it, and repeat orders from their clients stay theirs, so you can pay your team on real numbers. Commission is still paid to the business.</p>
+        </div>
+      </div>
+
+      <div className="flex gap-2 mt-4 mb-5">
+        <input value={name} onChange={e => setName(e.target.value)} onKeyDown={e => e.key === 'Enter' && add()} placeholder="Add a team member by name"
+          className="flex-1 px-4 py-2.5 rounded-xl bg-gray-50 border border-gray-200 text-sm outline-none focus:border-tv-teal" />
+        <button onClick={add} disabled={busy || !name.trim()} className="px-4 py-2.5 rounded-xl bg-tv-dark text-white text-sm font-bold disabled:opacity-40">Add</button>
+      </div>
+      {err && <p className="text-xs text-red-500 mb-3">{err}</p>}
+
+      {staff.length === 0 ? (
+        <p className="text-sm text-gray-400">No team members yet. If it's just you, you can ignore this.</p>
+      ) : (
+        <div className="overflow-x-auto">
+          <table className="w-full text-sm min-w-[560px]">
+            <thead><tr className="text-[10px] uppercase tracking-wider text-gray-400"><th className="text-left py-2">Person</th>{isAffiliate && <th className="text-left py-2">Their link</th>}<th className="text-right py-2">Referrals</th><th className="text-right py-2">Sales</th><th className="text-right py-2">Repeat</th><th className="text-right py-2">This month</th><th className="text-right py-2">All time</th><th className="py-2"></th></tr></thead>
+            <tbody>
+              {staff.map(m => { const r = rows.find(x => x.staff_name === m.name) || {}; return (
+                <tr key={m.id} className={`border-t border-gray-100 ${m.active === false ? 'opacity-40' : ''}`}>
+                  <td className="py-2.5 font-medium text-gray-900">{m.name}</td>
+                  {isAffiliate && <td className="py-2.5 text-xs text-gray-500 font-mono">truevitals.co.uk/?ref={partner.ref_slug}&by={m.slug}</td>}
+                  <td className="py-2.5 text-right">{r.referrals || 0}</td>
+                  <td className="py-2.5 text-right">{r.conversions || 0}</td>
+                  <td className="py-2.5 text-right">{r.repeat_conversions || 0}</td>
+                  <td className="py-2.5 text-right">{gbp(r.commission_this_month_pence || 0)}</td>
+                  <td className="py-2.5 text-right font-bold text-tv-teal">{gbp(r.commission_pence || 0)}</td>
+                  <td className="py-2.5 text-right"><button onClick={() => toggle(m)} className="text-[11px] text-gray-400 hover:text-gray-700">{m.active === false ? 'Reactivate' : 'Remove'}</button></td>
+                </tr>) })}
+              {rows.find(x => x.staff_name === 'Unassigned') && (
+                <tr className="border-t border-gray-100 text-gray-400"><td className="py-2.5">Unassigned</td>{isAffiliate && <td />}<td className="py-2.5 text-right">{rows.find(x => x.staff_name === 'Unassigned').referrals}</td><td className="py-2.5 text-right">{rows.find(x => x.staff_name === 'Unassigned').conversions}</td><td className="py-2.5 text-right">{rows.find(x => x.staff_name === 'Unassigned').repeat_conversions}</td><td className="py-2.5 text-right">{gbp(rows.find(x => x.staff_name === 'Unassigned').commission_this_month_pence)}</td><td className="py-2.5 text-right">{gbp(rows.find(x => x.staff_name === 'Unassigned').commission_pence)}</td><td /></tr>
+              )}
+            </tbody>
+            {total > 0 && <tfoot><tr className="border-t-2 border-gray-200"><td className="py-2.5 font-bold text-gray-900" colSpan={isAffiliate ? 6 : 5}>Total earned</td><td className="py-2.5 text-right font-bold text-gray-900">{gbp(total)}</td><td /></tr></tfoot>}
+          </table>
+        </div>
+      )}
     </div>
   )
 }
@@ -779,7 +866,7 @@ function Referrals({ referrals, partner }) {
           <div key={r.id} className="px-5 sm:px-6 py-4 flex items-center justify-between gap-4">
             <div className="min-w-0">
               <p className="font-medium text-sm text-gray-900 truncate">
-                {r.customer_name || r.customer_first_name || 'Client'} · {PANEL[r.panel_type] || 'Panel'}
+                {r.customer_name || r.customer_first_name || 'Client'} · {PANEL[r.panel_type] || 'Panel'}{r.referred_by_staff ? <span className="text-gray-400 font-normal"> · by {r.referred_by_staff}</span> : null}
               </p>
               <p className="text-xs text-gray-400 mt-0.5">
                 {fmtDate(r.created_at)}
@@ -1093,6 +1180,8 @@ export default function App() {
   const [referrals, setReferrals] = useState([])
   const [payouts, setPayouts] = useState([])
   const [rates, setRates] = useState([])
+  const [staff, setStaff] = useState([])
+  const [staffSummary, setStaffSummary] = useState([])
   const [loading, setLoading] = useState(true)
   const [notFound, setNotFound] = useState(false)
 
@@ -1113,12 +1202,14 @@ export default function App() {
     const { data: p } = await supabase.from('partners').select('*').eq('auth_user_id', session.user.id).maybeSingle()
     if (!p) { setNotFound(true); setLoading(false); return }
     setPartner(p)
-    const [{ data: r }, { data: po }, { data: rt }] = await Promise.all([
+    const [{ data: r }, { data: po }, { data: rt }, { data: st }, { data: ss }] = await Promise.all([
       supabase.from('partner_referrals').select('*').eq('partner_id', p.id).order('created_at', { ascending: false }),
       supabase.from('partner_payouts').select('*').eq('partner_id', p.id).order('created_at', { ascending: false }),
-      supabase.from('partner_rates').select('*').order('commission_pence')
+      supabase.from('partner_rates').select('*').order('commission_pence'),
+      supabase.from('partner_staff').select('*').eq('partner_id', p.id).order('created_at'),
+      supabase.from('partner_staff_summary').select('*').eq('partner_id', p.id)
     ])
-    setReferrals(r || []); setPayouts(po || []); setRates(rt || []); setLoading(false)
+    setReferrals(r || []); setPayouts(po || []); setRates(rt || []); setStaff(st || []); setStaffSummary(ss || []); setLoading(false)
   }, [session])
 
   useEffect(() => { load() }, [load])
@@ -1154,8 +1245,9 @@ export default function App() {
         </h1>
         <p className="text-sm text-gray-400 mt-1">Here's how your referrals are doing</p>
       </div>
-      <ReferClient partner={partner} rates={rates} onDone={load} />
+      <ReferClient partner={partner} rates={rates} staff={staff} onDone={load} />
       <Stats referrals={referrals} partner={partner} />
+      <Team partner={partner} staff={staff} staffSummary={staffSummary} onChange={load} />
       <Referrals referrals={referrals} partner={partner} />
       <Payout partner={partner} referrals={referrals} payouts={payouts} onRefresh={load} />
       <Scripts partner={partner} referrals={referrals} />
