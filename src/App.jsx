@@ -387,7 +387,7 @@ function Resources({ signedIn }) {
 function Faq() {
   const qs = [
     ['Does it cost anything to join?','No. There is no fee, no minimum number of referrals, and no contract tying you in. If it does not work for you, stop using your code.'],
-    ['How and when do I get paid?','Commission is credited as soon as an order completes. Once you are owed £50 or more we pay you automatically by bank transfer through Stripe; connect your bank once in the portal and it runs on its own. All commission rates are inclusive of VAT where applicable: if you are VAT-registered you account for VAT within the amount, it is not added on top. You are responsible for declaring the income.'],
+    ['How and when do I get paid?','Commission is credited as soon as an order completes. Once you pass £50 you can request a payout from your dashboard, and we pay by bank transfer within five working days. You are responsible for declaring the income.'],
     ['I\'m a clinician. Is a referral fee appropriate?','That is your call and depends on your regulator. GMC-registered doctors must declare financial interests when recommending a service. If you would rather not take a fee, we can set you up as a reciprocal partner: you refer patients to us, we refer customers to you, and no money changes hands.'],
     ['Do you send business back to clinical partners?','Yes. When a customer\'s results need clinical input beyond what a report can give, we point them towards partners in their area with the relevant specialism.'],
     ['What do I actually give my clients?','A code, created for that one person, and a link. Your dashboard has a logo pack, a one-page explainer and a panel comparison.']
@@ -422,7 +422,7 @@ function Foot() {
           ))}
         </div>
         <p className="text-xs text-gray-600 leading-relaxed max-w-3xl">
-          TrueVitals Group Ltd, registered in England and Wales, company number 16449605. Registered office: Ground Floor, Rear Barn, The Brookdale Centre, Knutsford, Cheshire, WA16 0SR. Commission rates are inclusive of VAT where applicable, correct at time of publication and may be reviewed with notice. Blood testing is not a substitute for medical advice. Partners are responsible for declaring commission income to HMRC.
+          TrueVitals Group Ltd, registered in England and Wales, company number 16449605. Registered office: Ground Floor, Rear Barn, The Brookdale Centre, Knutsford, Cheshire, WA16 0SR. Commission rates correct at time of publication and may be reviewed with notice. Blood testing is not a substitute for medical advice. Partners are responsible for declaring commission income to HMRC.
         </p>
       </div>
     </footer>
@@ -434,92 +434,58 @@ function Foot() {
 // ============================================================
 function SignIn({ open, onClose }) {
   const [email, setEmail] = useState('')
-  const [password, setPassword] = useState('')
-  const [mode, setMode] = useState('login')   // login | forgot | sent
+  const [sent, setSent] = useState(false)
   const [err, setErr] = useState('')
   const [busy, setBusy] = useState(false)
   if (!open) return null
 
-  const login = async () => {
-    if (!email.trim() || !password) return
+  const send = async () => {
+    if (!email.trim()) return
     setBusy(true); setErr('')
-    const { error } = await supabase.auth.signInWithPassword({ email: email.trim().toLowerCase(), password })
+    const { error } = await supabase.auth.signInWithOtp({
+      email: email.trim().toLowerCase(),
+      options: { emailRedirectTo: window.location.origin, shouldCreateUser: false }
+    })
     setBusy(false)
-    if (error) setErr(/invalid/i.test(error.message) ? 'Email or password not recognised.' : error.message)
-    else onClose()
+    if (error) {
+      const notFound = /not found|signups not allowed|not authorized|Invalid login/i.test(error.message)
+      setErr(notFound ? 'notfound' : error.message)
+    } else setSent(true)
   }
-
-  const forgot = async () => {
-    if (!email.trim()) { setErr('Enter your email first.'); return }
-    setBusy(true); setErr('')
-    const { error } = await supabase.auth.resetPasswordForEmail(email.trim().toLowerCase(), { redirectTo: window.location.origin })
-    setBusy(false)
-    if (error) setErr(error.message); else setMode('sent')
-  }
-
-  const field = 'w-full px-4 py-3.5 rounded-xl bg-white/5 border border-white/10 text-white placeholder-gray-600 text-sm outline-none focus:border-tv-teal transition-colors'
 
   return (
     <div className="fixed inset-0 z-[100] flex items-center justify-center p-5" onClick={onClose}>
       <div className="absolute inset-0 bg-black/70 backdrop-blur-sm" />
       <div className="relative w-full max-w-sm bg-tv-dark border border-white/10 rounded-2xl p-8" onClick={e=>e.stopPropagation()}>
-        {mode === 'sent' ? (
+        {sent ? (
           <div className="text-center">
             <div className="w-12 h-12 rounded-full bg-tv-teal/15 text-tv-teal flex items-center justify-center mx-auto mb-4 text-xl">✓</div>
             <h3 className="font-heading font-bold text-white mb-2">Check your email</h3>
-            <p className="text-sm text-gray-400 leading-relaxed">We&rsquo;ve sent a password reset link to {email}. It&rsquo;s valid for one hour.</p>
+            <p className="text-sm text-gray-400 leading-relaxed">We&rsquo;ve sent a sign-in link to {email}. It&rsquo;s valid for one hour.</p>
           </div>
-        ) : mode === 'forgot' ? (
-          <>
-            <h3 className="font-heading font-bold text-white text-xl mb-1.5">Reset your password</h3>
-            <p className="text-sm text-gray-400 mb-6">Enter your partner account email and we&rsquo;ll send a link to choose a new password.</p>
-            <input type="email" value={email} onChange={e=>setEmail(e.target.value)} onKeyDown={e=>e.key==='Enter'&&forgot()} placeholder="you@business.com" autoFocus className={field} />
-            {err && <p className="text-red-400 text-xs mt-2.5">{err}</p>}
-            <button onClick={forgot} disabled={busy} className="w-full mt-4 py-3.5 rounded-xl bg-tv-teal text-tv-dark font-bold text-sm hover:bg-tv-teal-dark transition-colors disabled:opacity-50">{busy ? 'Sending…' : 'Send reset link'}</button>
-            <button onClick={()=>{ setMode('login'); setErr('') }} className="w-full mt-3 text-xs text-gray-500 hover:text-gray-300">Back to sign in</button>
-          </>
         ) : (
           <>
             <h3 className="font-heading font-bold text-white text-xl mb-1.5">Partner sign in</h3>
-            <p className="text-sm text-gray-400 mb-6">For approved partners. Your team can share this login.</p>
-            <input type="email" value={email} onChange={e=>setEmail(e.target.value)} placeholder="you@business.com" autoFocus className={field} autoComplete="username" />
-            <input type="password" value={password} onChange={e=>setPassword(e.target.value)} onKeyDown={e=>e.key==='Enter'&&login()} placeholder="Password" className={field + ' mt-3'} autoComplete="current-password" />
-            {err && <p className="text-red-400 text-xs mt-2.5">{err}</p>}
-            <button onClick={login} disabled={busy} className="w-full mt-4 py-3.5 rounded-xl bg-tv-teal text-tv-dark font-bold text-sm hover:bg-tv-teal-dark transition-colors disabled:opacity-50">{busy ? 'Signing in…' : 'Sign in'}</button>
-            <button onClick={()=>{ setMode('forgot'); setErr('') }} className="w-full mt-3 text-xs text-gray-500 hover:text-gray-300">Forgot your password?</button>
+            <p className="text-sm text-gray-400 mb-6">For approved partners. No password &mdash; we email you a link.</p>
+            <input type="email" value={email} onChange={e=>setEmail(e.target.value)} onKeyDown={e=>e.key==='Enter'&&send()}
+              placeholder="you@business.com" autoFocus
+              className="w-full px-4 py-3.5 rounded-xl bg-white/5 border border-white/10 text-white placeholder-gray-600 text-sm outline-none focus:border-tv-teal transition-colors" />
+            {err === 'notfound' ? (
+              <div className="mt-3 px-3.5 py-3 rounded-lg bg-white/5 border border-white/10">
+                <p className="text-sm text-gray-300 mb-1">No partner account with that email.</p>
+                <p className="text-xs text-gray-500 leading-relaxed">Sign in is for approved partners. If you have applied and not heard back, we will email you as soon as it is reviewed.</p>
+                <a href="https://truevitals.co.uk/partners" target="_blank" rel="noopener" className="inline-block mt-2.5 text-xs font-bold text-tv-teal hover:underline">Apply to join &rarr;</a>
+              </div>
+            ) : err ? <p className="text-red-400 text-xs mt-2.5">{err}</p> : null}
+            <button onClick={send} disabled={busy}
+              className="w-full mt-4 py-3.5 rounded-xl bg-tv-teal text-tv-dark font-bold text-sm hover:bg-tv-teal-dark transition-colors disabled:opacity-50">
+              {busy ? 'Sending…' : 'Email me a link'}
+            </button>
             <p className="text-xs text-gray-600 mt-5 text-center">
               Not a partner yet? <a href="https://truevitals.co.uk/partners" target="_blank" rel="noopener" className="text-tv-teal hover:underline">Apply here</a>
             </p>
           </>
         )}
-      </div>
-    </div>
-  )
-}
-
-// Shown when a partner arrives from the invite or password-reset email.
-function SetPassword({ onDone, firstTime }) {
-  const [p1, setP1] = useState(''); const [p2, setP2] = useState('')
-  const [err, setErr] = useState(''); const [busy, setBusy] = useState(false)
-  const field = 'w-full px-4 py-3.5 rounded-xl bg-white/5 border border-white/10 text-white placeholder-gray-600 text-sm outline-none focus:border-tv-teal transition-colors'
-  const save = async () => {
-    if (p1.length < 8) { setErr('Use at least 8 characters.'); return }
-    if (p1 !== p2) { setErr('Passwords don\u2019t match.'); return }
-    setBusy(true); setErr('')
-    const { error } = await supabase.auth.updateUser({ password: p1 })
-    setBusy(false)
-    if (error) setErr(error.message); else onDone()
-  }
-  return (
-    <div className="min-h-screen bg-tv-dark flex items-center justify-center p-6">
-      <div className="w-full max-w-sm bg-white/5 border border-white/10 rounded-2xl p-8">
-        <p className="text-[11px] font-bold tracking-[0.2em] uppercase text-tv-teal mb-3">TrueVitals Partners</p>
-        <h1 className="font-heading font-bold text-white text-xl mb-1.5">{firstTime ? 'Choose your password' : 'Set a new password'}</h1>
-        <p className="text-sm text-gray-400 mb-6">{firstTime ? 'This is the login your team will share. Pick something you can pass on securely.' : 'Choose a new password for your partner login.'}</p>
-        <input type="password" value={p1} onChange={e=>setP1(e.target.value)} placeholder="New password" autoFocus className={field} autoComplete="new-password" />
-        <input type="password" value={p2} onChange={e=>setP2(e.target.value)} onKeyDown={e=>e.key==='Enter'&&save()} placeholder="Repeat password" className={field + ' mt-3'} autoComplete="new-password" />
-        {err && <p className="text-red-400 text-xs mt-2.5">{err}</p>}
-        <button onClick={save} disabled={busy} className="w-full mt-4 py-3.5 rounded-xl bg-tv-teal text-tv-dark font-bold text-sm hover:bg-tv-teal-dark transition-colors disabled:opacity-50">{busy ? 'Saving…' : 'Save and continue'}</button>
       </div>
     </div>
   )
@@ -552,7 +518,7 @@ function Marketing() {
 // ============================================================
 //  SHELL
 // ============================================================
-function Shell({ partner, children, onSignOut }) {
+function Shell({ partner, children, onSignOut, onGuide }) {
   const [open, setOpen] = useState(false)
   return (
     <div className="min-h-screen bg-gray-50">
@@ -562,6 +528,8 @@ function Shell({ partner, children, onSignOut }) {
             <img src={LOGO} alt="TrueVitals" className="h-7 w-auto" />
             <span className="text-[10px] font-bold uppercase tracking-[0.15em] text-gray-500">Partner</span>
           </div>
+          <div className="flex items-center gap-2">
+          <button onClick={onGuide} className="px-3 py-1.5 rounded-lg text-xs font-bold text-tv-teal border border-tv-teal/30 hover:bg-tv-teal/10 transition-colors">Guide</button>
           <div className="relative">
             <button onClick={() => setOpen(!open)} className="flex items-center gap-2.5 text-sm text-gray-300 hover:text-white transition-colors">
               <span className="hidden sm:inline">{partner.business_name || partner.name}</span>
@@ -579,6 +547,7 @@ function Shell({ partner, children, onSignOut }) {
               </div>
             )}
           </div>
+          </div>
         </div>
       </header>
       <main className="max-w-5xl mx-auto px-5 sm:px-8 py-8 sm:py-10">{children}</main>
@@ -593,10 +562,7 @@ function Shell({ partner, children, onSignOut }) {
 //  REFER A CLIENT
 // ============================================================
 
-function ReferClient({ partner, rates, staff, onDone }) {
-  const staffKey = 'tv_partner_staff_' + partner.id
-  const [who, setWho] = useState(() => { try { return localStorage.getItem(staffKey) || '' } catch (e) { return '' } })
-  useEffect(() => { try { if (who) localStorage.setItem(staffKey, who) } catch (e) {} }, [who])
+function ReferClient({ partner, rates, onDone }) {
   const [name, setName] = useState('')
   const [email, setEmail] = useState('')
   const [panel, setPanel] = useState('ultimate')
@@ -618,7 +584,6 @@ function ReferClient({ partner, rates, staff, onDone }) {
           auth_user_id: partner.auth_user_id,
           customer_name: name.trim(),
           customer_email: email.trim().toLowerCase(),
-          referred_by_staff: who || null,
           panel: panel
         })
       })
@@ -690,19 +655,6 @@ function ReferClient({ partner, rates, staff, onDone }) {
             className="px-4 py-3 rounded-xl bg-white/5 border border-white/10 text-white placeholder-gray-600 text-sm outline-none focus:border-tv-teal transition-colors" />
         </div>
 
-        {staff.length > 0 && (
-          <>
-            <p className="text-[10px] font-bold uppercase tracking-wider text-gray-500 mb-2 mt-5">Who is referring?</p>
-            <div className="flex flex-wrap gap-2 mb-2">
-              {staff.filter(m => m.active !== false).map(m => (
-                <button key={m.id} onClick={() => setWho(m.name)}
-                  className={`px-3.5 py-2 rounded-lg border text-xs font-bold transition-colors ${who === m.name ? 'border-tv-teal bg-tv-teal/10 text-tv-teal' : 'border-white/10 bg-white/5 text-gray-300 hover:border-white/20'}`}>{m.name}</button>
-              ))}
-            </div>
-            <p className="text-[11px] text-gray-600 mb-3">Remembered on this device, so you only pick once. Add or remove people under Team below.</p>
-          </>
-        )}
-
         <p className="text-[10px] font-bold uppercase tracking-wider text-gray-500 mb-2 mt-5">Which panel are you recommending?</p>
         <div className="grid sm:grid-cols-3 gap-2 mb-5">
           {rates.map(r => (
@@ -727,113 +679,6 @@ function ReferClient({ partner, rates, staff, onDone }) {
           {busy ? 'Creating\u2026' : 'Create their code'}
         </button>
       </div>
-    </div>
-  )
-}
-
-
-// ============================================================
-//  HOW IT WORKS (tier-aware)
-// ============================================================
-function HowItWorks({ partner, rates }) {
-  const isAff = partner.tier === 'affiliate'
-  const g = (p) => gbp(p)
-  const ult = rates.find(r => r.panel === 'ultimate'), sig = rates.find(r => r.panel === 'randox'), adv = rates.find(r => r.panel === 'advanced')
-  const steps = isAff ? [
-    ['Share your link', <>Your link is <span className="font-mono text-tv-teal">truevitals.co.uk/?ref={partner.ref_slug}</span>. Put it in your bio, a story, a newsletter, wherever your audience is. Add <span className="font-mono">&amp;by=name</span> to give each person on your team their own version.</>],
-    ['Someone clicks and buys', <>If they buy within <strong>{partner.attribution_window_days || 30} days</strong> of clicking, the sale is yours. They don&rsquo;t need a code and nothing changes at checkout for them.</>],
-    ['You earn once per sale', <>{adv && sig ? <>{g(adv.commission_pence)} on Advanced, {g(ult?.commission_pence)} on Ultimate, {g(sig.commission_pence)} on Signature.</> : null} The rate follows whatever they actually buy, and all commission is <strong>inclusive of VAT</strong> where it applies. Repeat purchases by the same person later aren&rsquo;t credited: each sale needs a fresh click through your link.</>],
-    ['You get paid automatically', <>Once you&rsquo;re owed &pound;50 or more, it&rsquo;s transferred to your bank through Stripe. Connect your bank once below and it runs on its own.</>],
-  ] : [
-    ['Refer a client', <>Enter their email above and we create a <strong>code just for them</strong>. It gives them money off, it only works for them, and it lasts 90 days.</>],
-    ['They use the code at checkout', <>Every code you create is tagged to whoever on your team made it, so you always know who&rsquo;s bringing the business in.</>],
-    ['You earn on that sale, and every one after', <>{adv && sig ? <>{g(adv.commission_pence)} on Advanced, {g(ult?.commission_pence)} on Ultimate, {g(sig.commission_pence)} on Signature.</> : null} The rate follows whatever they buy, and all commission is <strong>inclusive of VAT</strong> where it applies. Then the important bit: <strong>that client is linked to you permanently</strong>. When they retest in six months, or upgrade next year, you&rsquo;re credited again with no code needed. Your referrals compound.</>],
-    ['You get paid automatically', <>Once you&rsquo;re owed &pound;50 or more, it&rsquo;s transferred to your bank through Stripe. Connect your bank once below and it runs on its own. Your team breakdown shows exactly who earned what.</>],
-  ]
-  return (
-    <div className="bg-white rounded-2xl border border-gray-100 p-6 sm:p-8 mb-6">
-      <h2 className="font-heading font-bold text-gray-900 mb-1">How your programme works</h2>
-      <p className="text-xs text-gray-400 mb-5">{isAff ? 'You\u2019re set up as an affiliate: link-based, credited once per sale.' : 'You\u2019re set up as a partner: client codes, with lifetime credit on every client you bring.'}</p>
-      <ol className="space-y-4">
-        {steps.map(([t, body], i) => (
-          <li key={i} className="flex gap-4">
-            <span className="w-7 h-7 rounded-full bg-tv-teal text-tv-dark text-xs font-black flex items-center justify-center shrink-0 mt-0.5">{i + 1}</span>
-            <div><p className="text-sm font-bold text-gray-900">{t}</p><p className="text-sm text-gray-500 leading-relaxed mt-0.5">{body}</p></div>
-          </li>
-        ))}
-      </ol>
-      {partner.commission_pence === 0 && !isAff && (
-        <p className="mt-5 text-xs text-gray-500 bg-gray-50 rounded-lg px-4 py-3 leading-relaxed">Your arrangement is reciprocal rather than fee-based: your clients still get their discount and their lifetime link to you, and no commission accrues.</p>
-      )}
-    </div>
-  )
-}
-
-// ============================================================
-//  TEAM (who inside the business referred whom)
-// ============================================================
-function Team({ partner, staff, staffSummary, onChange }) {
-  const [name, setName] = useState('')
-  const [busy, setBusy] = useState(false)
-  const [err, setErr] = useState('')
-  const isAffiliate = partner.tier === 'affiliate'
-  const slugify = (t) => String(t || '').toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/^-|-$/g, '').slice(0, 30)
-
-  const add = async () => {
-    const n = name.trim(); if (!n) return
-    setBusy(true); setErr('')
-    const { error } = await supabase.from('partner_staff').insert({ partner_id: partner.id, name: n, slug: slugify(n) })
-    setBusy(false)
-    if (error) setErr(/duplicate/i.test(error.message) ? 'That name is already on your team.' : error.message)
-    else { setName(''); onChange() }
-  }
-  const toggle = async (m) => { await supabase.from('partner_staff').update({ active: !m.active }).eq('id', m.id); onChange() }
-
-  const rows = staffSummary || []
-  const total = rows.reduce((a, r) => a + Number(r.commission_pence || 0), 0)
-
-  return (
-    <div className="bg-white rounded-2xl border border-gray-100 p-6 sm:p-8 mb-6">
-      <div className="flex flex-wrap justify-between items-start gap-3 mb-1">
-        <div>
-          <h2 className="font-heading font-bold text-gray-900">Team</h2>
-          <p className="text-xs text-gray-400 mt-1 max-w-md leading-relaxed">Add the people who refer clients. Each referral is tagged to whoever made it, and repeat orders from their clients stay theirs, so you can pay your team on real numbers. Commission is still paid to the business.</p>
-        </div>
-      </div>
-
-      <div className="flex gap-2 mt-4 mb-5">
-        <input value={name} onChange={e => setName(e.target.value)} onKeyDown={e => e.key === 'Enter' && add()} placeholder="Add a team member by name"
-          className="flex-1 px-4 py-2.5 rounded-xl bg-gray-50 border border-gray-200 text-sm outline-none focus:border-tv-teal" />
-        <button onClick={add} disabled={busy || !name.trim()} className="px-4 py-2.5 rounded-xl bg-tv-dark text-white text-sm font-bold disabled:opacity-40">Add</button>
-      </div>
-      {err && <p className="text-xs text-red-500 mb-3">{err}</p>}
-
-      {staff.length === 0 ? (
-        <p className="text-sm text-gray-400">No team members yet. If it's just you, you can ignore this.</p>
-      ) : (
-        <div className="overflow-x-auto">
-          <table className="w-full text-sm min-w-[560px]">
-            <thead><tr className="text-[10px] uppercase tracking-wider text-gray-400"><th className="text-left py-2">Person</th>{isAffiliate && <th className="text-left py-2">Their link</th>}<th className="text-right py-2">Referrals</th><th className="text-right py-2">Sales</th><th className="text-right py-2">Repeat</th><th className="text-right py-2">This month</th><th className="text-right py-2">All time</th><th className="py-2"></th></tr></thead>
-            <tbody>
-              {staff.map(m => { const r = rows.find(x => x.staff_name === m.name) || {}; return (
-                <tr key={m.id} className={`border-t border-gray-100 ${m.active === false ? 'opacity-40' : ''}`}>
-                  <td className="py-2.5 font-medium text-gray-900">{m.name}</td>
-                  {isAffiliate && <td className="py-2.5 text-xs text-gray-500 font-mono">truevitals.co.uk/?ref={partner.ref_slug}&by={m.slug}</td>}
-                  <td className="py-2.5 text-right">{r.referrals || 0}</td>
-                  <td className="py-2.5 text-right">{r.conversions || 0}</td>
-                  <td className="py-2.5 text-right">{r.repeat_conversions || 0}</td>
-                  <td className="py-2.5 text-right">{gbp(r.commission_this_month_pence || 0)}</td>
-                  <td className="py-2.5 text-right font-bold text-tv-teal">{gbp(r.commission_pence || 0)}</td>
-                  <td className="py-2.5 text-right"><button onClick={() => toggle(m)} className="text-[11px] text-gray-400 hover:text-gray-700">{m.active === false ? 'Reactivate' : 'Remove'}</button></td>
-                </tr>) })}
-              {rows.find(x => x.staff_name === 'Unassigned') && (
-                <tr className="border-t border-gray-100 text-gray-400"><td className="py-2.5">Unassigned</td>{isAffiliate && <td />}<td className="py-2.5 text-right">{rows.find(x => x.staff_name === 'Unassigned').referrals}</td><td className="py-2.5 text-right">{rows.find(x => x.staff_name === 'Unassigned').conversions}</td><td className="py-2.5 text-right">{rows.find(x => x.staff_name === 'Unassigned').repeat_conversions}</td><td className="py-2.5 text-right">{gbp(rows.find(x => x.staff_name === 'Unassigned').commission_this_month_pence)}</td><td className="py-2.5 text-right">{gbp(rows.find(x => x.staff_name === 'Unassigned').commission_pence)}</td><td /></tr>
-              )}
-            </tbody>
-            {total > 0 && <tfoot><tr className="border-t-2 border-gray-200"><td className="py-2.5 font-bold text-gray-900" colSpan={isAffiliate ? 6 : 5}>Total earned</td><td className="py-2.5 text-right font-bold text-gray-900">{gbp(total)}</td><td /></tr></tfoot>}
-          </table>
-        </div>
-      )}
     </div>
   )
 }
@@ -903,7 +748,7 @@ function Referrals({ referrals, partner }) {
           <div key={r.id} className="px-5 sm:px-6 py-4 flex items-center justify-between gap-4">
             <div className="min-w-0">
               <p className="font-medium text-sm text-gray-900 truncate">
-                {r.customer_name || r.customer_first_name || 'Client'} · {PANEL[r.panel_type] || 'Panel'}{r.referred_by_staff ? <span className="text-gray-400 font-normal"> · by {r.referred_by_staff}</span> : null}
+                {r.customer_name || r.customer_first_name || 'Client'} · {PANEL[r.panel_type] || 'Panel'}
               </p>
               <p className="text-xs text-gray-400 mt-0.5">
                 {fmtDate(r.created_at)}
@@ -1209,6 +1054,162 @@ Message me for a code — it takes money off.` }
 }
 
 // ============================================================
+//  GETTING STARTED GUIDE
+//  Shows automatically on first sign-in. Dismissible, and always
+//  reachable again from the header. Not FAQs — a walkthrough.
+// ============================================================
+function Guide({ partner, referrals, open, onClose }) {
+  const KEY = 'tv_guide_seen_' + partner.id
+  const [auto, setAuto] = useState(false)
+
+  useEffect(() => {
+    try { if (!localStorage.getItem(KEY)) setAuto(true) } catch (e) {}
+  }, [])
+
+  const close = () => {
+    try { localStorage.setItem(KEY, '1') } catch (e) {}
+    setAuto(false); onClose && onClose()
+  }
+
+  if (!open && !auto) return null
+
+  const isAffiliate = partner.tier === 'affiliate'
+  const hasReferred = referrals.length > 0
+  const canBePaid = !!partner.payouts_enabled
+
+  const Step = ({ n, title, done, children }) => (
+    <div className="flex gap-4 py-5 border-b border-gray-100 last:border-0">
+      <div className={`shrink-0 w-8 h-8 rounded-xl flex items-center justify-center font-heading font-black text-sm ${done ? 'bg-tv-teal text-tv-dark' : 'bg-gray-100 text-gray-400'}`}>
+        {done ? '✓' : n}
+      </div>
+      <div className="min-w-0">
+        <h4 className="font-heading font-bold text-gray-900 text-[15px] mb-1.5">{title}</h4>
+        <div className="text-sm text-gray-500 leading-relaxed space-y-2">{children}</div>
+      </div>
+    </div>
+  )
+
+  return (
+    <div className="fixed inset-0 z-[120] overflow-y-auto" onClick={close}>
+      <div className="absolute inset-0 bg-black/60 backdrop-blur-sm" />
+      <div className="relative min-h-full flex items-start justify-center p-4 sm:p-8">
+        <div className="w-full max-w-2xl bg-white rounded-2xl my-6" onClick={e => e.stopPropagation()}>
+
+          <div className="bg-tv-dark rounded-t-2xl px-8 py-9 relative overflow-hidden">
+            <div className="absolute -top-24 -right-16 w-72 h-72 rounded-full bg-tv-teal/12 blur-3xl pointer-events-none" />
+            <div className="relative">
+              <p className="text-[10px] font-bold uppercase tracking-[0.2em] text-tv-teal mb-3">Getting started</p>
+              <h2 className="font-heading font-black text-white text-2xl sm:text-3xl tracking-tight leading-tight">
+                How this works, in five minutes
+              </h2>
+              <p className="text-sm text-gray-400 mt-3 leading-relaxed max-w-md">
+                Worth reading once properly. Most of what people get wrong is here.
+              </p>
+            </div>
+          </div>
+
+          <div className="px-8 py-7">
+
+            <div className="rounded-xl bg-tv-teal/[0.06] border-l-[3px] border-tv-teal p-5 mb-7">
+              <p className="text-sm text-gray-700 leading-relaxed">
+                {isAffiliate ? (
+                  <>You have a <b>link</b>, not codes. Anyone who clicks it and buys within your attribution window is credited to you. Share it wherever your audience is.</>
+                ) : (
+                  <>The short version: you create a <b>code for one specific person</b>, they use it at checkout, and from that moment they are yours. Every test they ever book pays you again, with no code needed the second time.</>
+                )}
+              </p>
+            </div>
+
+            {!isAffiliate && (
+              <>
+                <Step n="1" title="Refer someone by email" done={hasReferred}>
+                  <p>Use the box at the top of your dashboard. Put in the client's email address and pick the panel you think fits. We create a code for <b>that one person</b>.</p>
+                  <p>The code works once and expires after 90 days. It is not a code to share around, and it will not work for anyone else.</p>
+                </Step>
+
+                <Step n="2" title="Send it to them">
+                  <p>Copy the code and send it however you normally talk to them. There are pre-written messages further down your dashboard under <b>What to send</b>, already filled in with their name and code.</p>
+                  <p>Change the wording. They sound better in your voice than in ours.</p>
+                </Step>
+
+                <Step n="3" title="They enter it at checkout">
+                  <p>This is the part that matters. They must type the code in at checkout on truevitals.co.uk, or nothing is tracked and you are not credited.</p>
+                  <p>If someone books without it, tell us and we will sort it. Do not create a second code for them.</p>
+                </Step>
+
+                <Step n="4" title="From then on, they are yours">
+                  <p>Once that first order completes, that person is linked to you permanently. When they test again in six or twelve months, you are paid again automatically with no code and nothing to do.</p>
+                  <p>That is the whole point of the programme and it is why it is worth having the conversation once.</p>
+                </Step>
+              </>
+            )}
+
+            {isAffiliate && (
+              <>
+                <Step n="1" title="Use your link, not a code">
+                  <p>Your referral link is in your dashboard. Anyone who clicks it and buys within your attribution window is credited to you.</p>
+                  <p>Put it in a bio, a caption, a newsletter, a video description. Wherever your audience already is.</p>
+                </Step>
+                <Step n="2" title="The window matters">
+                  <p>Attribution lasts a set number of days from the click. If someone clicks today and buys next month, that may fall outside it. Reminding your audience close to when they are likely to act works better than a one-off post.</p>
+                </Step>
+                <Step n="3" title="First purchase only">
+                  <p>Affiliate attribution covers the first order a person places. It does not continue to future tests, which is the difference between this and our structured partner programme.</p>
+                </Step>
+              </>
+            )}
+
+            <Step n={isAffiliate ? '4' : '5'} title="Set up payouts before you earn anything" done={canBePaid}>
+              <p>{canBePaid
+                ? 'Already done. Commission is credited automatically and paid to your bank once you pass £50.'
+                : 'Go to the payouts section on your dashboard and click Set up payouts. It takes about five minutes through Stripe, who hold your bank details and run the identity checks. We never see them.'}</p>
+              <p>{canBePaid ? '' : 'Do it now rather than when you have money waiting. Nothing can be paid until it is done.'}</p>
+            </Step>
+
+            <div className="mt-8 pt-7 border-t border-gray-100">
+              <h3 className="font-heading font-bold text-gray-900 text-[15px] mb-4">Two things not to do</h3>
+              <div className="space-y-3">
+                <div className="flex gap-3">
+                  <span className="shrink-0 w-5 h-5 rounded-full bg-red-50 text-red-500 flex items-center justify-center text-xs font-bold mt-0.5">×</span>
+                  <p className="text-sm text-gray-500 leading-relaxed"><b className="text-gray-900">Do not blanket message everyone.</b> It converts badly and it makes you look like you are selling something. Raise it when someone actually asks you why they are tired, or why nothing is working.</p>
+                </div>
+                <div className="flex gap-3">
+                  <span className="shrink-0 w-5 h-5 rounded-full bg-red-50 text-red-500 flex items-center justify-center text-xs font-bold mt-0.5">×</span>
+                  <p className="text-sm text-gray-500 leading-relaxed"><b className="text-gray-900">Do not promise a test will find something.</b> Say it is worth knowing rather than guessing. Never interpret results yourself, and never suggest testing replaces seeing a doctor.</p>
+                </div>
+              </div>
+            </div>
+
+            <div className="mt-7 pt-7 border-t border-gray-100">
+              <h3 className="font-heading font-bold text-gray-900 text-[15px] mb-3">What to do today</h3>
+              <ul className="space-y-2">
+                {!canBePaid && <li className="text-sm text-gray-500 leading-relaxed">• Set up payouts, so you are ready when the first commission lands.</li>}
+                {!hasReferred && !isAffiliate && <li className="text-sm text-gray-500 leading-relaxed">• Think of one person who has told you recently that they are exhausted, or that nothing is shifting. Refer them.</li>}
+                <li className="text-sm text-gray-500 leading-relaxed">• Have a look at <a href="https://truevitals.co.uk/our-report" target="_blank" rel="noopener" className="text-tv-teal-dark font-semibold">an example report</a> so you know what you are recommending.</li>
+                <li className="text-sm text-gray-500 leading-relaxed">• Download the flyer from Resources if you have a reception or a waiting area.</li>
+              </ul>
+            </div>
+
+            <div className="mt-8 flex flex-col sm:flex-row gap-3">
+              <button onClick={close} className="flex-1 py-3.5 rounded-xl bg-tv-teal text-tv-dark font-bold text-sm hover:bg-tv-teal-dark transition-colors">
+                Got it, take me to my dashboard
+              </button>
+              <a href="mailto:partners@truevitals.co.uk" className="py-3.5 px-6 rounded-xl border-2 border-gray-200 text-gray-600 font-bold text-sm text-center hover:border-tv-teal hover:text-tv-teal-dark transition-colors">
+                Ask us something
+              </a>
+            </div>
+
+            <p className="text-xs text-gray-400 text-center mt-5">
+              You can open this again any time from <b>Guide</b> in the header.
+            </p>
+          </div>
+        </div>
+      </div>
+    </div>
+  )
+}
+
+// ============================================================
 //  APP
 // ============================================================
 export default function App() {
@@ -1217,20 +1218,13 @@ export default function App() {
   const [referrals, setReferrals] = useState([])
   const [payouts, setPayouts] = useState([])
   const [rates, setRates] = useState([])
-  const [staff, setStaff] = useState([])
-  const [staffSummary, setStaffSummary] = useState([])
+  const [guideOpen, setGuideOpen] = useState(false)
   const [loading, setLoading] = useState(true)
   const [notFound, setNotFound] = useState(false)
 
-  const [needsPassword, setNeedsPassword] = useState(() => /type=(invite|recovery)/.test(window.location.hash))
-  const [firstTime] = useState(() => /type=invite/.test(window.location.hash))
-
   useEffect(() => {
     supabase.auth.getSession().then(({ data }) => { setSession(data.session); if (!data.session) setLoading(false) })
-    const { data: sub } = supabase.auth.onAuthStateChange((event, s) => {
-      if (event === 'PASSWORD_RECOVERY') setNeedsPassword(true)
-      setSession(s); if (!s) { setPartner(null); setLoading(false) }
-    })
+    const { data: sub } = supabase.auth.onAuthStateChange((_e, s) => { setSession(s); if (!s) { setPartner(null); setLoading(false) } })
     return () => sub.subscription.unsubscribe()
   }, [])
 
@@ -1239,20 +1233,17 @@ export default function App() {
     const { data: p } = await supabase.from('partners').select('*').eq('auth_user_id', session.user.id).maybeSingle()
     if (!p) { setNotFound(true); setLoading(false); return }
     setPartner(p)
-    const [{ data: r }, { data: po }, { data: rt }, { data: st }, { data: ss }] = await Promise.all([
+    const [{ data: r }, { data: po }, { data: rt }] = await Promise.all([
       supabase.from('partner_referrals').select('*').eq('partner_id', p.id).order('created_at', { ascending: false }),
       supabase.from('partner_payouts').select('*').eq('partner_id', p.id).order('created_at', { ascending: false }),
-      supabase.from('partner_rates').select('*').order('commission_pence'),
-      supabase.from('partner_staff').select('*').eq('partner_id', p.id).order('created_at'),
-      supabase.from('partner_staff_summary').select('*').eq('partner_id', p.id)
+      supabase.from('partner_rates').select('*').order('commission_pence')
     ])
-    setReferrals(r || []); setPayouts(po || []); setRates(rt || []); setStaff(st || []); setStaffSummary(ss || []); setLoading(false)
+    setReferrals(r || []); setPayouts(po || []); setRates(rt || []); setLoading(false)
   }, [session])
 
   useEffect(() => { load() }, [load])
 
   if (!session) return <Marketing />
-  if (needsPassword) return <SetPassword firstTime={firstTime} onDone={() => { setNeedsPassword(false); try { history.replaceState(null, '', window.location.pathname) } catch (e) {} }} />
   if (loading) return <div className="min-h-screen bg-gray-50 flex items-center justify-center"><p className="text-sm text-gray-400">Loading…</p></div>
 
   if (notFound) return (
@@ -1275,17 +1266,16 @@ export default function App() {
   )
 
   return (
-    <Shell partner={partner} onSignOut={() => supabase.auth.signOut()}>
+    <Shell partner={partner} onSignOut={() => supabase.auth.signOut()} onGuide={() => setGuideOpen(true)}>
       <div className="mb-7">
         <h1 className="font-heading font-black text-2xl text-gray-900 tracking-tight">
           {partner.name?.split(' ')[0] ? `Hello ${partner.name.split(' ')[0]}` : 'Hello'}
         </h1>
         <p className="text-sm text-gray-400 mt-1">Here's how your referrals are doing</p>
       </div>
-      <ReferClient partner={partner} rates={rates} staff={staff} onDone={load} />
+      <Guide partner={partner} referrals={referrals} open={guideOpen} onClose={()=>setGuideOpen(false)} />
+      <ReferClient partner={partner} rates={rates} onDone={load} />
       <Stats referrals={referrals} partner={partner} />
-      <HowItWorks partner={partner} rates={rates} />
-      <Team partner={partner} staff={staff} staffSummary={staffSummary} onChange={load} />
       <Referrals referrals={referrals} partner={partner} />
       <Payout partner={partner} referrals={referrals} payouts={payouts} onRefresh={load} />
       <Scripts partner={partner} referrals={referrals} />
