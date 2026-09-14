@@ -387,7 +387,7 @@ function Resources({ signedIn }) {
 function Faq() {
   const qs = [
     ['Does it cost anything to join?','No. There is no fee, no minimum number of referrals, and no contract tying you in. If it does not work for you, stop using your code.'],
-    ['How and when do I get paid?','Commission is credited as soon as an order completes. Once you pass £50 you can request a payout from your dashboard, and we pay by bank transfer within five working days. You are responsible for declaring the income.'],
+    ['How and when do I get paid?','Commission is credited as soon as an order completes. Once you are owed £50 or more we pay you automatically by bank transfer through Stripe; connect your bank once in the portal and it runs on its own. All commission rates are inclusive of VAT where applicable: if you are VAT-registered you account for VAT within the amount, it is not added on top. You are responsible for declaring the income.'],
     ['I\'m a clinician. Is a referral fee appropriate?','That is your call and depends on your regulator. GMC-registered doctors must declare financial interests when recommending a service. If you would rather not take a fee, we can set you up as a reciprocal partner: you refer patients to us, we refer customers to you, and no money changes hands.'],
     ['Do you send business back to clinical partners?','Yes. When a customer\'s results need clinical input beyond what a report can give, we point them towards partners in their area with the relevant specialism.'],
     ['What do I actually give my clients?','A code, created for that one person, and a link. Your dashboard has a logo pack, a one-page explainer and a panel comparison.']
@@ -422,7 +422,7 @@ function Foot() {
           ))}
         </div>
         <p className="text-xs text-gray-600 leading-relaxed max-w-3xl">
-          TrueVitals Group Ltd, registered in England and Wales, company number 16449605. Registered office: Ground Floor, Rear Barn, The Brookdale Centre, Knutsford, Cheshire, WA16 0SR. Commission rates correct at time of publication and may be reviewed with notice. Blood testing is not a substitute for medical advice. Partners are responsible for declaring commission income to HMRC.
+          TrueVitals Group Ltd, registered in England and Wales, company number 16449605. Registered office: Ground Floor, Rear Barn, The Brookdale Centre, Knutsford, Cheshire, WA16 0SR. Commission rates are inclusive of VAT where applicable, correct at time of publication and may be reviewed with notice. Blood testing is not a substitute for medical advice. Partners are responsible for declaring commission income to HMRC.
         </p>
       </div>
     </footer>
