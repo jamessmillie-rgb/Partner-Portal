@@ -434,58 +434,92 @@ function Foot() {
 // ============================================================
 function SignIn({ open, onClose }) {
   const [email, setEmail] = useState('')
-  const [sent, setSent] = useState(false)
+  const [password, setPassword] = useState('')
+  const [mode, setMode] = useState('login')   // login | forgot | sent
   const [err, setErr] = useState('')
   const [busy, setBusy] = useState(false)
   if (!open) return null
 
-  const send = async () => {
-    if (!email.trim()) return
+  const login = async () => {
+    if (!email.trim() || !password) return
     setBusy(true); setErr('')
-    const { error } = await supabase.auth.signInWithOtp({
-      email: email.trim().toLowerCase(),
-      options: { emailRedirectTo: window.location.origin, shouldCreateUser: false }
-    })
+    const { error } = await supabase.auth.signInWithPassword({ email: email.trim().toLowerCase(), password })
     setBusy(false)
-    if (error) {
-      const notFound = /not found|signups not allowed|not authorized|Invalid login/i.test(error.message)
-      setErr(notFound ? 'notfound' : error.message)
-    } else setSent(true)
+    if (error) setErr(/invalid/i.test(error.message) ? 'Email or password not recognised.' : error.message)
+    else onClose()
   }
+
+  const forgot = async () => {
+    if (!email.trim()) { setErr('Enter your email first.'); return }
+    setBusy(true); setErr('')
+    const { error } = await supabase.auth.resetPasswordForEmail(email.trim().toLowerCase(), { redirectTo: window.location.origin })
+    setBusy(false)
+    if (error) setErr(error.message); else setMode('sent')
+  }
+
+  const field = 'w-full px-4 py-3.5 rounded-xl bg-white/5 border border-white/10 text-white placeholder-gray-600 text-sm outline-none focus:border-tv-teal transition-colors'
 
   return (
     <div className="fixed inset-0 z-[100] flex items-center justify-center p-5" onClick={onClose}>
       <div className="absolute inset-0 bg-black/70 backdrop-blur-sm" />
       <div className="relative w-full max-w-sm bg-tv-dark border border-white/10 rounded-2xl p-8" onClick={e=>e.stopPropagation()}>
-        {sent ? (
+        {mode === 'sent' ? (
           <div className="text-center">
             <div className="w-12 h-12 rounded-full bg-tv-teal/15 text-tv-teal flex items-center justify-center mx-auto mb-4 text-xl">✓</div>
             <h3 className="font-heading font-bold text-white mb-2">Check your email</h3>
-            <p className="text-sm text-gray-400 leading-relaxed">We&rsquo;ve sent a sign-in link to {email}. It&rsquo;s valid for one hour.</p>
+            <p className="text-sm text-gray-400 leading-relaxed">We&rsquo;ve sent a password reset link to {email}. It&rsquo;s valid for one hour.</p>
           </div>
+        ) : mode === 'forgot' ? (
+          <>
+            <h3 className="font-heading font-bold text-white text-xl mb-1.5">Reset your password</h3>
+            <p className="text-sm text-gray-400 mb-6">Enter your partner account email and we&rsquo;ll send a link to choose a new password.</p>
+            <input type="email" value={email} onChange={e=>setEmail(e.target.value)} onKeyDown={e=>e.key==='Enter'&&forgot()} placeholder="you@business.com" autoFocus className={field} />
+            {err && <p className="text-red-400 text-xs mt-2.5">{err}</p>}
+            <button onClick={forgot} disabled={busy} className="w-full mt-4 py-3.5 rounded-xl bg-tv-teal text-tv-dark font-bold text-sm hover:bg-tv-teal-dark transition-colors disabled:opacity-50">{busy ? 'Sending…' : 'Send reset link'}</button>
+            <button onClick={()=>{ setMode('login'); setErr('') }} className="w-full mt-3 text-xs text-gray-500 hover:text-gray-300">Back to sign in</button>
+          </>
         ) : (
           <>
             <h3 className="font-heading font-bold text-white text-xl mb-1.5">Partner sign in</h3>
-            <p className="text-sm text-gray-400 mb-6">For approved partners. No password &mdash; we email you a link.</p>
-            <input type="email" value={email} onChange={e=>setEmail(e.target.value)} onKeyDown={e=>e.key==='Enter'&&send()}
-              placeholder="you@business.com" autoFocus
-              className="w-full px-4 py-3.5 rounded-xl bg-white/5 border border-white/10 text-white placeholder-gray-600 text-sm outline-none focus:border-tv-teal transition-colors" />
-            {err === 'notfound' ? (
-              <div className="mt-3 px-3.5 py-3 rounded-lg bg-white/5 border border-white/10">
-                <p className="text-sm text-gray-300 mb-1">No partner account with that email.</p>
-                <p className="text-xs text-gray-500 leading-relaxed">Sign in is for approved partners. If you have applied and not heard back, we will email you as soon as it is reviewed.</p>
-                <a href="https://truevitals.co.uk/partners" target="_blank" rel="noopener" className="inline-block mt-2.5 text-xs font-bold text-tv-teal hover:underline">Apply to join &rarr;</a>
-              </div>
-            ) : err ? <p className="text-red-400 text-xs mt-2.5">{err}</p> : null}
-            <button onClick={send} disabled={busy}
-              className="w-full mt-4 py-3.5 rounded-xl bg-tv-teal text-tv-dark font-bold text-sm hover:bg-tv-teal-dark transition-colors disabled:opacity-50">
-              {busy ? 'Sending…' : 'Email me a link'}
-            </button>
+            <p className="text-sm text-gray-400 mb-6">For approved partners. Your team can share this login.</p>
+            <input type="email" value={email} onChange={e=>setEmail(e.target.value)} placeholder="you@business.com" autoFocus className={field} autoComplete="username" />
+            <input type="password" value={password} onChange={e=>setPassword(e.target.value)} onKeyDown={e=>e.key==='Enter'&&login()} placeholder="Password" className={field + ' mt-3'} autoComplete="current-password" />
+            {err && <p className="text-red-400 text-xs mt-2.5">{err}</p>}
+            <button onClick={login} disabled={busy} className="w-full mt-4 py-3.5 rounded-xl bg-tv-teal text-tv-dark font-bold text-sm hover:bg-tv-teal-dark transition-colors disabled:opacity-50">{busy ? 'Signing in…' : 'Sign in'}</button>
+            <button onClick={()=>{ setMode('forgot'); setErr('') }} className="w-full mt-3 text-xs text-gray-500 hover:text-gray-300">Forgot your password?</button>
             <p className="text-xs text-gray-600 mt-5 text-center">
               Not a partner yet? <a href="https://truevitals.co.uk/partners" target="_blank" rel="noopener" className="text-tv-teal hover:underline">Apply here</a>
             </p>
           </>
         )}
+      </div>
+    </div>
+  )
+}
+
+// Shown when a partner arrives from the invite or password-reset email.
+function SetPassword({ onDone, firstTime }) {
+  const [p1, setP1] = useState(''); const [p2, setP2] = useState('')
+  const [err, setErr] = useState(''); const [busy, setBusy] = useState(false)
+  const field = 'w-full px-4 py-3.5 rounded-xl bg-white/5 border border-white/10 text-white placeholder-gray-600 text-sm outline-none focus:border-tv-teal transition-colors'
+  const save = async () => {
+    if (p1.length < 8) { setErr('Use at least 8 characters.'); return }
+    if (p1 !== p2) { setErr('Passwords don\u2019t match.'); return }
+    setBusy(true); setErr('')
+    const { error } = await supabase.auth.updateUser({ password: p1 })
+    setBusy(false)
+    if (error) setErr(error.message); else onDone()
+  }
+  return (
+    <div className="min-h-screen bg-tv-dark flex items-center justify-center p-6">
+      <div className="w-full max-w-sm bg-white/5 border border-white/10 rounded-2xl p-8">
+        <p className="text-[11px] font-bold tracking-[0.2em] uppercase text-tv-teal mb-3">TrueVitals Partners</p>
+        <h1 className="font-heading font-bold text-white text-xl mb-1.5">{firstTime ? 'Choose your password' : 'Set a new password'}</h1>
+        <p className="text-sm text-gray-400 mb-6">{firstTime ? 'This is the login your team will share. Pick something you can pass on securely.' : 'Choose a new password for your partner login.'}</p>
+        <input type="password" value={p1} onChange={e=>setP1(e.target.value)} placeholder="New password" autoFocus className={field} autoComplete="new-password" />
+        <input type="password" value={p2} onChange={e=>setP2(e.target.value)} onKeyDown={e=>e.key==='Enter'&&save()} placeholder="Repeat password" className={field + ' mt-3'} autoComplete="new-password" />
+        {err && <p className="text-red-400 text-xs mt-2.5">{err}</p>}
+        <button onClick={save} disabled={busy} className="w-full mt-4 py-3.5 rounded-xl bg-tv-teal text-tv-dark font-bold text-sm hover:bg-tv-teal-dark transition-colors disabled:opacity-50">{busy ? 'Saving…' : 'Save and continue'}</button>
       </div>
     </div>
   )
@@ -1062,9 +1096,15 @@ export default function App() {
   const [loading, setLoading] = useState(true)
   const [notFound, setNotFound] = useState(false)
 
+  const [needsPassword, setNeedsPassword] = useState(() => /type=(invite|recovery)/.test(window.location.hash))
+  const [firstTime] = useState(() => /type=invite/.test(window.location.hash))
+
   useEffect(() => {
     supabase.auth.getSession().then(({ data }) => { setSession(data.session); if (!data.session) setLoading(false) })
-    const { data: sub } = supabase.auth.onAuthStateChange((_e, s) => { setSession(s); if (!s) { setPartner(null); setLoading(false) } })
+    const { data: sub } = supabase.auth.onAuthStateChange((event, s) => {
+      if (event === 'PASSWORD_RECOVERY') setNeedsPassword(true)
+      setSession(s); if (!s) { setPartner(null); setLoading(false) }
+    })
     return () => sub.subscription.unsubscribe()
   }, [])
 
@@ -1084,6 +1124,7 @@ export default function App() {
   useEffect(() => { load() }, [load])
 
   if (!session) return <Marketing />
+  if (needsPassword) return <SetPassword firstTime={firstTime} onDone={() => { setNeedsPassword(false); try { history.replaceState(null, '', window.location.pathname) } catch (e) {} }} />
   if (loading) return <div className="min-h-screen bg-gray-50 flex items-center justify-center"><p className="text-sm text-gray-400">Loading…</p></div>
 
   if (notFound) return (
