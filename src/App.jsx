@@ -733,6 +733,43 @@ function ReferClient({ partner, rates, staff, onDone }) {
 
 
 // ============================================================
+//  HOW IT WORKS (tier-aware)
+// ============================================================
+function HowItWorks({ partner, rates }) {
+  const isAff = partner.tier === 'affiliate'
+  const g = (p) => gbp(p)
+  const ult = rates.find(r => r.panel === 'ultimate'), sig = rates.find(r => r.panel === 'randox'), adv = rates.find(r => r.panel === 'advanced')
+  const steps = isAff ? [
+    ['Share your link', <>Your link is <span className="font-mono text-tv-teal">truevitals.co.uk/?ref={partner.ref_slug}</span>. Put it in your bio, a story, a newsletter, wherever your audience is. Add <span className="font-mono">&amp;by=name</span> to give each person on your team their own version.</>],
+    ['Someone clicks and buys', <>If they buy within <strong>{partner.attribution_window_days || 30} days</strong> of clicking, the sale is yours. They don&rsquo;t need a code and nothing changes at checkout for them.</>],
+    ['You earn once per sale', <>{adv && sig ? <>{g(adv.commission_pence)} on Advanced, {g(ult?.commission_pence)} on Ultimate, {g(sig.commission_pence)} on Signature.</> : null} The rate follows whatever they actually buy. Repeat purchases by the same person later aren&rsquo;t credited: each sale needs a fresh click through your link.</>],
+    ['You get paid automatically', <>Once you&rsquo;re owed &pound;50 or more, it&rsquo;s transferred to your bank through Stripe. Connect your bank once below and it runs on its own.</>],
+  ] : [
+    ['Refer a client', <>Enter their email above and we create a <strong>code just for them</strong>. It gives them money off, it only works for them, and it lasts 90 days.</>],
+    ['They use the code at checkout', <>Every code you create is tagged to whoever on your team made it, so you always know who&rsquo;s bringing the business in.</>],
+    ['You earn on that sale, and every one after', <>{adv && sig ? <>{g(adv.commission_pence)} on Advanced, {g(ult?.commission_pence)} on Ultimate, {g(sig.commission_pence)} on Signature.</> : null} The rate follows whatever they buy. Then the important bit: <strong>that client is linked to you permanently</strong>. When they retest in six months, or upgrade next year, you&rsquo;re credited again with no code needed. Your referrals compound.</>],
+    ['You get paid automatically', <>Once you&rsquo;re owed &pound;50 or more, it&rsquo;s transferred to your bank through Stripe. Connect your bank once below and it runs on its own. Your team breakdown shows exactly who earned what.</>],
+  ]
+  return (
+    <div className="bg-white rounded-2xl border border-gray-100 p-6 sm:p-8 mb-6">
+      <h2 className="font-heading font-bold text-gray-900 mb-1">How your programme works</h2>
+      <p className="text-xs text-gray-400 mb-5">{isAff ? 'You\u2019re set up as an affiliate: link-based, credited once per sale.' : 'You\u2019re set up as a partner: client codes, with lifetime credit on every client you bring.'}</p>
+      <ol className="space-y-4">
+        {steps.map(([t, body], i) => (
+          <li key={i} className="flex gap-4">
+            <span className="w-7 h-7 rounded-full bg-tv-teal text-tv-dark text-xs font-black flex items-center justify-center shrink-0 mt-0.5">{i + 1}</span>
+            <div><p className="text-sm font-bold text-gray-900">{t}</p><p className="text-sm text-gray-500 leading-relaxed mt-0.5">{body}</p></div>
+          </li>
+        ))}
+      </ol>
+      {partner.commission_pence === 0 && !isAff && (
+        <p className="mt-5 text-xs text-gray-500 bg-gray-50 rounded-lg px-4 py-3 leading-relaxed">Your arrangement is reciprocal rather than fee-based: your clients still get their discount and their lifetime link to you, and no commission accrues.</p>
+      )}
+    </div>
+  )
+}
+
+// ============================================================
 //  TEAM (who inside the business referred whom)
 // ============================================================
 function Team({ partner, staff, staffSummary, onChange }) {
@@ -1247,6 +1284,7 @@ export default function App() {
       </div>
       <ReferClient partner={partner} rates={rates} staff={staff} onDone={load} />
       <Stats referrals={referrals} partner={partner} />
+      <HowItWorks partner={partner} rates={rates} />
       <Team partner={partner} staff={staff} staffSummary={staffSummary} onChange={load} />
       <Referrals referrals={referrals} partner={partner} />
       <Payout partner={partner} referrals={referrals} payouts={payouts} onRefresh={load} />
